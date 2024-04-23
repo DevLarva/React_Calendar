@@ -6,7 +6,7 @@ export default function Day({day, rowIdx}) {
         return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")  ? 'bg-blue-600 text-white rounded-full w-7' : ''
     }
     return (
-        <div className="boder border-gray-200 flex flex-col">
+        <div className="border border-gray-200 flex flex-col">
             <header className="flex flex-col items-center">
                 {rowIdx === 0 && (
                     <p className="text-sm mt-1">{day.format('ddd').toUpperCase()}</p>
@@ -21,4 +21,4 @@ export default function Day({day, rowIdx}) {
 
 
 //`text-sm p-1 my-1 text-center  ${getCurrentDayclass()}` 백틱사용
-// 백틱 사용 방법 영어 상태일때 ESC 밑에 있는거 
+// 백틱 사용 방법 영어 상태일때 ESC 밑에 있는거! ''작은 따옴표랑은 다름
