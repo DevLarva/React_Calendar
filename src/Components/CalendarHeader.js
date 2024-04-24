@@ -15,13 +15,15 @@ export default function CalendarHeaders() {
             setMonthIndex(monthIndex +1);
         }
         function handleReset() {
-            setMonthIndex(dayjs().month())
+            setMonthIndex(monthIndex === dayjs().month() 
+            ? monthIndex + Math.random()
+            : dayjs().month())
         }
     return (
         <header className="px-4 py2 flex items-center">
             <img src= {logo} alt="calendar" className="mr-2 w-12 h-12"/>
             <h1 className="mr-10 tex-xl text-gray-500 fond-bold">
-                달력
+                holy moly
             </h1>
             <button onClick={handleReset} className="border rounded py-2 px-4 mr-5">
                 오늘
