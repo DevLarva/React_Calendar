@@ -1,6 +1,16 @@
 import React, { useContext, useState } from 'react'
 import GlobalContext from '../context/GlobalContext'
 
+const labelsClasses = [
+  "indigo",
+  "gray",
+  "green",
+  "blue",
+  "red",
+  "purple",
+  "red"
+];
+
 export default function EventModal() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -43,10 +53,23 @@ export default function EventModal() {
                      required
                      className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500" 
                      onChange={(e) => setDescription(e.target.value)} 
-              />
+            />
+            <span className="material-icons-outlined text-gray-400">
+                bookmark_border
+            </span>
+            <div className="flex gap-x-2">
+              {labelsClasses.map((lblClass, i) => (
+                <span key={i}
+                className={`bg-${lblClass}-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}>
+                  <span className="material-icons-outlined text-white text-sm">
+                    check
+                  </span>
+                </span>
+              ) )}
             </div>
+          </div>
         </div>
       </form>
     </div>
-  )
+  );
 }
