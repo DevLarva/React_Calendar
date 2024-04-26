@@ -8,7 +8,6 @@ const labelsClasses = [
   "blue",
   "red",
   "purple",
-  "red"
 ];
 
 export default function EventModal() {
@@ -58,7 +57,7 @@ export default function EventModal() {
                 bookmark_border
             </span>
             <div className="flex gap-x-2">
-              {labelsClasses.map((lblClass, i) => (
+            {labelsClasses.map((lblClass, i) => (
                 <span key={i}
                 className={`bg-${lblClass}-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}>
                   <span className="material-icons-outlined text-white text-sm">

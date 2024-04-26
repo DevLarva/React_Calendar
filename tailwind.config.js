@@ -1,10 +1,23 @@
-/** @type {import('tailwindcss').Config} */
+const labelsClasses = [
+  "indigo",
+  "gray",
+  "green",
+  "blue",
+  "red",
+  "purple",
+];
+
 module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}','./public/index.html'],
-  darkMode: false,
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  purge: {
+    content: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
+  
+    safelist: [
+      ...labelsClasses.map((lbl) => `bg-${lbl}-500`),
+      ...labelsClasses.map((lbl) => `bg-${lbl}-200`),
+      ...labelsClasses.map((lbl) => `text-${lbl}-400`)
+    ],
+  },
+  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
       fontFamily: {
@@ -15,9 +28,8 @@ module.exports = {
       }
     },
   },
-  varients: {
-    extends: {},
+  variants: {
+    extend: {},
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [require("@tailwindcss/forms")],
 }
-
