@@ -13,6 +13,7 @@ const labelsClasses = [
 export default function EventModal() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [selectedLabel, setSelectedLabel] = useState("");
     const {setShowEventModal, daySelected}  = useContext(GlobalContext)
   return (
     <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center">
@@ -41,7 +42,7 @@ export default function EventModal() {
             <span className="material-icons-outlined text-gray-400">
                 schedule
             </span>
-            <p>{daySelected.format("dddd, MMMM DD")}</p>
+            <p>{daySelected.format("dddd, MMMM D일")}</p>
             <span className="material-icons-outlined text-gray-400">
                 segment
             </span>
@@ -58,16 +59,23 @@ export default function EventModal() {
             </span>
             <div className="flex gap-x-2">
             {labelsClasses.map((lblClass, i) => (
-                <span key={i}
+                <span key={i} onClick={() => setSelectedLabel(lblClass) }
                 className={`bg-${lblClass}-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}>
-                  <span className="material-icons-outlined text-white text-sm">
+                  {selectedLabel === lblClass && <span className="material-icons-outlined text-white text-sm">
                     check
                   </span>
+                  }
                 </span>
               ) )}
             </div>
           </div>
         </div>
+        <footer className="flex justify-end w-100 border-t p-3 mt-5">
+          <button type="submit" className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded text-white">
+              저장
+          </button>
+
+        </footer>
       </form>
     </div>
   );
