@@ -11,10 +11,23 @@ const labelsClasses = [
 ];
 
 export default function EventModal() {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [selectedLabel, setSelectedLabel] = useState("");
-    const {setShowEventModal, daySelected, dispatchCalEvent }  = useContext(GlobalContext)
+    const {
+      setShowEventModal,
+      daySelected,
+      dispatchCalEvent,
+      selectedEvent 
+    }  = useContext(GlobalContext);
+    const [title, setTitle] = useState(
+      selectedEvent ? selectedEvent.title : ""
+    );
+    const [description, setDescription] = useState(
+      selectedEvent ? selectedEvent.description : ""
+    );
+    const [selectedLabel, setSelectedLabel] = useState(
+      selectedEvent ? labelsClasses.find((lbl) => 
+      lbl === selectedEvent.label) : labelsClasses[0]
+    );
+    
 
     function handleSubmit(e) {
       e.preventDefault()
@@ -23,9 +36,14 @@ export default function EventModal() {
         description,
         label: selectedLabel,
         day: daySelected.valueOf(),
-        id: Date.now()
+        id: selectedEvent ? selectedEvent.id : Date.now(),
       };
-      dispatchCalEvent({type: "push", payload: calendarEvent });
+      if(selectedEvent) {
+        dispatchCalEvent({type: "update", payload: calendarEvent });
+      } else {
+        dispatchCalEvent({type: "push", payload: calendarEvent });
+      }
+      
       setShowEventModal(false);
     }
   return (
@@ -35,11 +53,24 @@ export default function EventModal() {
             <span className="material-icons-outlined text-gray-400">
                 drag_handle
             </span>
+            <div>
+              {selectedEvent && (
+                 <span 
+                 onClick={() => {
+                  dispatchCalEvent({type: "delete", payload: selectedEvent});
+                  setShowEventModal(false);
+                }} 
+                 className="material-icons-outlined text-gray-400 cursor-pointer">
+                 delete
+                </span>
+              )}
             <button onClick={() => setShowEventModal(false)}>
                 <span className="material-icons-outlined text-gray-400">
                     close
                 </span>
             </button>
+            </div>
+       
         </header>
         <div className="p-3">
             <div className="grid grid-cols-1/5 items-end gap-y-7">
