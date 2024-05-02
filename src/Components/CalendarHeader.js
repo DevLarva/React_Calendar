@@ -21,8 +21,8 @@ export default function CalendarHeaders() {
         }
     return (
         <header className="px-4 py2 flex items-center">
-            <img src= {logo} alt="calendar" className="mr-2 w-12 h-12"/>
-            <h1 className="mr-10 tex-xl text-black-500 font-sans">
+            <img src= {logo} alt="And N" className="mr-2 w-12 h-12"/>
+            <h1 className="mr-10 tex-2xl text-black-500 font-sans font-bold ">
                 And N
             </h1>
             
@@ -48,3 +48,4 @@ export default function CalendarHeaders() {
 
 // dayjs 한글 적용하기 아래 링크 참고
 // https://ordinary-code.tistory.com/155
+// 헤더 부분 추후 수정 필요

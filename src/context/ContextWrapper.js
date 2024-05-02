@@ -66,6 +66,7 @@ export default function ContextWrapper(props) {
     function updateLabel(label) {
         setLabels(labels.map((lbl) => lbl.label === label.label ? label : lbl))
     }
+    
     return (
         <GlobalContext.Provider
          value={{

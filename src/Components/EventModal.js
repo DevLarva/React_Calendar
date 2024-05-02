@@ -17,6 +17,7 @@ export default function EventModal() {
       dispatchCalEvent,
       selectedEvent 
     }  = useContext(GlobalContext);
+    
     const [title, setTitle] = useState(
       selectedEvent ? selectedEvent.title : ""
     );
@@ -86,7 +87,8 @@ export default function EventModal() {
             <span className="material-icons-outlined text-gray-400">
                 schedule
             </span>
-            <p>{daySelected.format("dddd, MMMM D일")}</p>
+            <p>{daySelected.format("dddd, MMMM D일")} ~ {daySelected.format("dddd, MMMM D일")}</p>
+            
             <span className="material-icons-outlined text-gray-400">
                 segment
             </span>
@@ -123,3 +125,6 @@ export default function EventModal() {
     </div>
   );
 }
+
+
+// 날짜 선택 가능하게끔 ex. like 노션
