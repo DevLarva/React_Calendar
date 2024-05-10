@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import GlobalContext from '../context/GlobalContext'
-import DateRangePicker from './DatePicker';     //추가
+
 
 const labelsClasses = [
   "indigo",
@@ -29,8 +29,7 @@ export default function EventModal() {
       selectedEvent ? labelsClasses.find((lbl) => 
       lbl === selectedEvent.label) : labelsClasses[0]
     );
-    const [startDate, setStartDate] = useState(daySelected.toDate());   //추가
-    const [endDate, setEndDate] = useState(daySelected.toDate());       //추가
+    
 
     function handleSubmit(e) {
       e.preventDefault()
@@ -38,8 +37,6 @@ export default function EventModal() {
         title,
         description,
         label: selectedLabel,
-        startDate: startDate.valueOf(),   //추가
-        endDate: endDate.valueOf(),       //추가
         id: selectedEvent ? selectedEvent.id : Date.now(),
       };
       if(selectedEvent) {
@@ -90,14 +87,7 @@ export default function EventModal() {
             <span className="material-icons-outlined text-gray-400">
                 schedule
             </span>
-            <p className="w-full flex justify-center">
-              <DateRangePicker
-                selectedStartDate={startDate}
-                selectedEndDate={endDate}
-                onChangeStartDate={setStartDate}
-                onChangeEndDate={setEndDate}
-              />
-            </p>
+            <p>{daySelected.format("dddd, MMMM D일")} ~ {daySelected.format("dddd, MMMM D일")}</p>
             
             <span className="material-icons-outlined text-gray-400">
                 segment
