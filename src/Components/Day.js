@@ -3,9 +3,13 @@ import dayjs from "dayjs";
 import GlobalContext from "../context/GlobalContext";
 
 export default function Day({day, rowIdx}) {
-    const [dayEvents, setDayEvents] = useState([])
+    // dayEvents 상태를 선언 및 초기화
+    const [dayEvents, setDayEvents] = useState([]) 
+    //전역 컨텍스트에서 필요한 값 가져옴
     const {setDaySelected, setShowEventModal, filteredEvents, setSelectedEvent}  = useContext(GlobalContext)
+ 
 
+    // 컴포넌트가 렌더링될 때 필요한 이벤트들을 필터링하여 설정
     useEffect(()=>{
         const events = filteredEvents.filter(
         (evt) => dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
@@ -13,23 +17,28 @@ export default function Day({day, rowIdx}) {
       setDayEvents(events)
     }, [filteredEvents, day]);
     
-
+    // 현재 날짜에 해당하는 클래스를 반환하는 함수를 정의
     function getCurrentDayclass() {
         return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")  ? 'bg-blue-600 text-white rounded-full w-7' : ''
     }
     return (
         <div className="border border-gray-200 flex flex-col">
             <header className="flex flex-col items-center">
+                {/* rowIdx가 0일 경우에만 요일을 표시. */}
                 {rowIdx === 0 && (
                     <p className="text-sm mt-1">{day.format('ddd').toUpperCase()}</p>
                 )}
+                {/* 현재 날짜에 해당하는 클래스를 사용하여 날짜를 표시. */}
               <p className={`text-sm p-1 my-1 text-center  ${getCurrentDayclass()}`}>
                 {day.format('DD')}</p>
+
             </header>
+                {/* 이벤트 목록을 표시하는 부분. */}
             <div className="flex-1 cursor-pointer" onClick={() =>{
                 setDaySelected(day);
                 setShowEventModal(true);
             }}>
+                 {/* 이벤트 목록을 매핑하여 렌더링. */}
                 {dayEvents.map((evt,idx) => (
                     <div key ={idx}
                     onClick={() =>setSelectedEvent(evt)}
@@ -41,6 +50,7 @@ export default function Day({day, rowIdx}) {
         </div>
     );
 }
+
 
 
 

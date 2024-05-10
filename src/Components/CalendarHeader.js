@@ -1,24 +1,34 @@
 import React, { useContext } from "react";
 import logo from '../assets/logo.png'
-import GlobalContext from "../context/GlobalContext";
+import GlobalContext from "../context/GlobalContext";  //전역 콘텍스트 가져오기
 import dayjs from "dayjs";
-import 'dayjs/locale/ko'
+import 'dayjs/locale/ko' //dayjs에서 한글을 사용하기 위해 한국어 설정 불러오기
 dayjs.locale('ko')
 
 
+// 캘린더 헤더 컴포넌트 정의
 export default function CalendarHeaders() {
+        // 전역 컨텍스트에서 monthIndex와 setMonthIndex를 가져옴.
         const {monthIndex, setMonthIndex} = useContext(GlobalContext);
-        function handlePrevMonth() {
+        
+
+        //이전 달 이동 함수
+        function handlePrevMonth() {    
             setMonthIndex(monthIndex -1);
         }
+        //다음 달 이동 함수
         function handleNextMonth() {
             setMonthIndex(monthIndex +1);
         }
+        //오늘 날짜로 이동하는 함수
         function handleReset() {
+            // 만약 monthIndex가 현재 월과 같다면 무작위로 monthIndex를 조정.
+            // 그렇지 않다면 현재 월로 설정.
             setMonthIndex(monthIndex === dayjs().month() 
             ? monthIndex + Math.random()
             : dayjs().month())
         }
+    // 캘린더 헤더 
     return (
         <header className="px-4 py2 flex items-center">
             <img src= {logo} alt="And N" className="mr-2 w-12 h-12"/>
@@ -26,6 +36,7 @@ export default function CalendarHeaders() {
                 And N
             </h1>
             
+            {/* 이전 달로 이동하는 버튼을 렌더링. */}
             <button onClick={handlePrevMonth}>
                 <span className="material-icons-outlined cursor-pointer text-gray-600 mx-2" >
                     chevron_left
@@ -45,6 +56,7 @@ export default function CalendarHeaders() {
         </header>
     )
 }
+
 
 // dayjs 한글 적용하기 아래 링크 참고
 // https://ordinary-code.tistory.com/155

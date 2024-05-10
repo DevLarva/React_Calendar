@@ -37,6 +37,7 @@ export default function EventModal() {
         title,
         description,
         label: selectedLabel,
+        day: daySelected.valueOf(),
         id: selectedEvent ? selectedEvent.id : Date.now(),
       };
       if(selectedEvent) {
@@ -125,6 +126,3 @@ export default function EventModal() {
     </div>
   );
 }
-
-
-// 날짜 선택 가능하게끔 ex. like 노션
