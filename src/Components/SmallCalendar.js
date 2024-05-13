@@ -6,6 +6,7 @@ import GlobalContext from '../context/GlobalContext';
 export default function SmallCalendar() {
     const [currentMonthIdx, setCurrentMonthIdx] = useState(dayjs().month())
     const [currentMonth, setCurrentMonth] = useState(getMonth())
+
     useEffect(() => {
         setCurrentMonth(getMonth(currentMonthIdx))
     }, [currentMonthIdx])
@@ -19,9 +20,11 @@ export default function SmallCalendar() {
     function handlePrevMonth() {
         setCurrentMonthIdx(currentMonthIdx -1)
     }
+
     function handleNextMonth() {
         setCurrentMonthIdx(currentMonthIdx +1)
     }
+        
     function getDayClass(day) {
         const format = "DD-MM-YY"
         const nowDay = dayjs().format(format)
@@ -53,6 +56,7 @@ export default function SmallCalendar() {
                     chevron_right
                 </span>
             </button>
+
         </header>
         <div className="grid grid-cols-7 grid-rows-6">
             {currentMonth[0].map((day,i) => (
@@ -79,7 +83,6 @@ export default function SmallCalendar() {
                 </React.Fragment>
             ))}
         </div>
-      
-    </div>
+    </div>           
   )
 }

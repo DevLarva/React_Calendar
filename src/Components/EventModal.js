@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react'
 import GlobalContext from '../context/GlobalContext'
 
-
 const labelsClasses = [
   "indigo",
   "gray",
@@ -18,7 +17,9 @@ export default function EventModal() {
       dispatchCalEvent,
       selectedEvent 
     }  = useContext(GlobalContext);
+
     
+
     const [title, setTitle] = useState(
       selectedEvent ? selectedEvent.title : ""
     );
@@ -48,6 +49,7 @@ export default function EventModal() {
       
       setShowEventModal(false);
     }
+    
   return (
     <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center">
       <form className="bg-white rounded-lg shadow-2xl w-1/4">
@@ -88,7 +90,7 @@ export default function EventModal() {
             <span className="material-icons-outlined text-gray-400">
                 schedule
             </span>
-            <p>{daySelected.format("dddd, MMMM D일")} ~ {daySelected.format("dddd, MMMM D일")}</p>
+            <p>{daySelected.format("dddd, MMMM D일")}</p>
             
             <span className="material-icons-outlined text-gray-400">
                 segment
