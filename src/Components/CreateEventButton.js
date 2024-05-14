@@ -15,3 +15,16 @@ export default function CreateEventButton() {
   </button>
   );
 }
+
+
+// useContext란?
+// 이전에 Context가 무엇인지를 알고 가야하는데.
+// 공식 문서에 따르면 context를 이용하면 단계마다 props를 넘겨주지 않고도 컴포넌트 트리 전체에 데이터를 제공 할 수 있다고 한다.
+// context API를 사용하기 위해서는 Provider , Consumer , createContext 이렇게 세가지 개념을 알고 있으면 된다.
+
+// createContext : context 객체를 생성한다.
+// Provider : 생성한 context를 하위 컴포넌트에게 전달하는 역할을 한다.
+// Consumer : context의 변화를 감시하는 컴포넌트이다.
+
+// 그럼 이제 useContext란 무엇인가?
+// useContext는 위에서 언급한 context를 좀더 편하게 사용할 수 있도록 도와주는 hook이다.
