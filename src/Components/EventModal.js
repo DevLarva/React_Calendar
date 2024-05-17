@@ -1,53 +1,55 @@
 import React, { useContext, useState } from 'react'
-import GlobalContext from '../context/GlobalContext'
+import GlobalContext from '../context/GlobalContext'  //전역 콘텍스트
 
-const labelsClasses = [
+const labelsClasses = [   //라벨 색상 배열 정의
   "indigo",
   "gray",
   "green",
   "blue",
   "red",
   "purple",
-];
+];  
 
 export default function EventModal() {
     const {
-      setShowEventModal,
-      daySelected,
-      dispatchCalEvent,
-      selectedEvent 
-    }  = useContext(GlobalContext);
+      setShowEventModal,  //모달 닫는 함수
+      daySelected,        // 선택된 날의 정보
+      dispatchCalEvent,   // 캘린더 이벤트를 업데이트하는 함수
+      selectedEvent       // 선택된 이벤트의 정보
+    }  = useContext(GlobalContext); //전역 상태 불러옴.
 
     
 
     const [title, setTitle] = useState(
       selectedEvent ? selectedEvent.title : ""
-    );
+    );  //이벤트 제목 상태를 정의하고, 선택된 이벤트가 있으면 그 제목으로 초기화
+
     const [description, setDescription] = useState(
       selectedEvent ? selectedEvent.description : ""
-    );
+    );  //이벤트 설명 상태를 정의하고, 선택된 이벤트가 있으면 그 설명으로 초기화
+
     const [selectedLabel, setSelectedLabel] = useState(
       selectedEvent ? labelsClasses.find((lbl) => 
       lbl === selectedEvent.label) : labelsClasses[0]
-    );
+    );  //선택된 라벨 상태 정의, 선택된 이벤트가 있으면 그 라벨로 초기화
     
 
     function handleSubmit(e) {
-      e.preventDefault()
+      e.preventDefault()  //폼 제출시 페이지 리로드 방지.
       const calendarEvent = {
         title,
         description,
         label: selectedLabel,
-        day: daySelected.valueOf(),
-        id: selectedEvent ? selectedEvent.id : Date.now(),
+        day: daySelected.valueOf(), //valueOf는 특정 객체의 원시 값을 반환하는것. 
+        id: selectedEvent ? selectedEvent.id : Date.now(),  //이벤트 ID를 설정.
       };
       if(selectedEvent) {
-        dispatchCalEvent({type: "update", payload: calendarEvent });
+        dispatchCalEvent({type: "update", payload: calendarEvent });  //기존 이벤트 업데이트.
       } else {
-        dispatchCalEvent({type: "push", payload: calendarEvent });
+        dispatchCalEvent({type: "push", payload: calendarEvent });  //새로운 이벤트 추가.
       }
       
-      setShowEventModal(false);
+      setShowEventModal(false); //모달 닫기
     }
     
   return (
@@ -61,7 +63,7 @@ export default function EventModal() {
               {selectedEvent && (
                  <span 
                  onClick={() => {
-                  dispatchCalEvent({type: "delete", payload: selectedEvent});
+                  dispatchCalEvent({type: "delete", payload: selectedEvent}); // 이벤트를 삭제합니다.
                   setShowEventModal(false);
                 }} 
                  className="material-icons-outlined text-gray-400 cursor-pointer">
