@@ -1,7 +1,7 @@
 import React from "react";
 
 //이것도 아래 링크 참고
-//React의 createContext 함수를 사용하여 GlobalContext라는 콘텍스트를 생성하고 있습니다.
+//React의 createContext 함수를 사용하여 GlobalContext라는 콘텍스트를 생성하고 있다.
 //이 콘텍스트는 애플리케이션 전체에서 상태와 함수를 공유하는 데 사용, 초기 상태 값과 해당 값을 설정하는 함수들이 포함됩니다.
 
 const GlobalContext =  React.createContext ({
