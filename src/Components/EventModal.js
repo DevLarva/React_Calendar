@@ -136,6 +136,15 @@
 import React, { useContext, useState, useEffect } from 'react'; // React와 useContext, useState 훅을 import
 import GlobalContext from '../context/GlobalContext'; // 전역 콘텍스트 import
 import dayjs from 'dayjs'; // dayjs 라이브러리 import
+import axios from 'axios';
+
+// 백엔드 호스트 설정
+let backendHost;
+const hostname = window && window.location && window.location.hostname;
+if (hostname === "localhost") {
+  backendHost = "http://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com";
+}
+export const API_BASE_URL = `${backendHost}`;
 
 // 라벨 색상 배열 정의
 const labelsClasses = [
@@ -148,60 +157,77 @@ const labelsClasses = [
 ];
 
 export default function EventModal() {
-    // 전역 컨텍스트에서 필요한 값들을 가져옴
-    const {
-      setShowEventModal,  // 모달을 닫는 함수
-      daySelected,        // 선택된 날의 정보
-      dispatchCalEvent,   // 캘린더 이벤트를 업데이트하는 함수
-      selectedEvent       // 선택된 이벤트의 정보
-    }  = useContext(GlobalContext);
+  // 전역 컨텍스트에서 필요한 값들을 가져옴
+  const {
+    setShowEventModal,  // 모달을 닫는 함수
+    daySelected,        // 선택된 날의 정보
+    dispatchCalEvent,   // 캘린더 이벤트를 업데이트하는 함수
+    selectedEvent       // 선택된 이벤트의 정보
+  }  = useContext(GlobalContext);
 
-    // 이벤트 제목 상태를 정의하고, 선택된 이벤트가 있으면 그 제목으로 초기화
-    const [title, setTitle] = useState(
-      selectedEvent ? selectedEvent.title : ""
-    );
-    // 이벤트 설명 상태를 정의하고, 선택된 이벤트가 있으면 그 설명으로 초기화
-    const [description, setDescription] = useState(
-      selectedEvent ? selectedEvent.description : ""
-    );
-    // 선택된 라벨 상태 정의, 선택된 이벤트가 있으면 그 라벨로 초기화
-    const [selectedLabel, setSelectedLabel] = useState(
-      selectedEvent ? labelsClasses.find((lbl) => 
-      lbl === selectedEvent.label) : labelsClasses[0]
-    );
-    // 이벤트 시작 날짜 상태 정의, 선택된 이벤트가 있으면 그 시작 날짜로 초기화
-    const [startDate, setStartDate] = useState(
-      selectedEvent ? dayjs(selectedEvent.startDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
-    );
-    // 이벤트 종료 날짜 상태 정의, 선택된 이벤트가 있으면 그 종료 날짜로 초기화
-    const [endDate, setEndDate] = useState(
-      selectedEvent ? dayjs(selectedEvent.endDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
-    );
+  // 이벤트 제목 상태를 정의하고, 선택된 이벤트가 있으면 그 제목으로 초기화
+  const [title, setTitle] = useState(
+    selectedEvent ? selectedEvent.title : ""
+  );
+  // 이벤트 설명 상태를 정의하고, 선택된 이벤트가 있으면 그 설명으로 초기화
+  const [description, setDescription] = useState(
+    selectedEvent ? selectedEvent.description : ""
+  );
+  // 선택된 라벨 상태 정의, 선택된 이벤트가 있으면 그 라벨로 초기화
+  const [selectedLabel, setSelectedLabel] = useState(
+    selectedEvent ? labelsClasses.find((lbl) => 
+    lbl === selectedEvent.label) : labelsClasses[0]
+  );
+  // 이벤트 시작 날짜 상태 정의, 선택된 이벤트가 있으면 그 시작 날짜로 초기화
+  const [startDate, setStartDate] = useState(
+    selectedEvent ? dayjs(selectedEvent.startDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
+  );
+  // 이벤트 종료 날짜 상태 정의, 선택된 이벤트가 있으면 그 종료 날짜로 초기화
+  const [endDate, setEndDate] = useState(
+    selectedEvent ? dayjs(selectedEvent.endDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
+  );
+  const [items, setItems] = useState([]);
 
-
-    useEffect(() => {
-      call("/api/andnCalendar/todo", "GET", null).then((response) => 
-          setItems(response)
-      );
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/api/andnCalendar/todo`)
+      .then(response => {
+        setItems(response.data);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the data!", error);
+      });
   }, []);
 
   const add = (item) => {
-      call("/api/andnCalendar/todo", "POST", item).then((response) => 
-          setItems(response)
-      );
+    axios.post(`${API_BASE_URL}/api/andnCalendar/todo`, item)
+      .then(response => {
+        setItems(response.data);
+      })
+      .catch(error => {
+        console.error("There was an error adding the item!", error);
+      });
   };
 
   const deleteItem = (item) => {
-      call(`/api/andnCalendar/todo/${item.id}`, "DELETE", item).then((response) => 
-          setItems(response)
-      );
+    axios.delete(`${API_BASE_URL}/api/andnCalendar/todo/${item.id}`)
+      .then(response => {
+        setItems(response.data);
+      })
+      .catch(error => {
+        console.error("There was an error deleting the item!", error);
+      });
   };
 
   const update = (item) => {
-      call(`/api/andnCalendar/todo/${item.id}`, "PATCH", item).then((response) => 
-          setItems(response)
-      );
+    axios.patch(`${API_BASE_URL}/api/andnCalendar/todo/${item.id}`, item)
+      .then(response => {
+        setItems(response.data);
+      })
+      .catch(error => {
+        console.error("There was an error updating the item!", error);
+      });
   };
+
 
     // 폼 제출 시 호출되는 함수
     function handleSubmit(e) {
