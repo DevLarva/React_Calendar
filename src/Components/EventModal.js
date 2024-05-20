@@ -133,14 +133,16 @@
 
 
 
-import React, { useContext, useState, useEffect } from 'react'; // React와 useContext, useState 훅을 import
+import React, { useContext, useState, useEffect } from 'react'; 
 import GlobalContext from '../context/GlobalContext'; // 전역 콘텍스트 import
 import dayjs from 'dayjs'; // dayjs 라이브러리 import
 import axios from 'axios';
+import { call } from './ApiService';
 
-// 백엔드 호스트 설정
+// API Base URL 설정
 let backendHost;
 const hostname = window && window.location && window.location.hostname;
+console.log("host name,", hostname)
 if (hostname === "localhost") {
   backendHost = "http://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com";
 }
@@ -189,43 +191,36 @@ export default function EventModal() {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/api/andnCalendar/todo`)
-      .then(response => {
-        setItems(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the data!", error);
-      });
+    call("/api/andnCalendar/todo", "GET", null)
+      .then(response => setItems(response))
+      .catch(error => console.error("There was an error fetching the data!", error));
   }, []);
 
+  // API 호출 함수들
   const add = (item) => {
-    axios.post(`${API_BASE_URL}/api/andnCalendar/todo`, item)
+    console.log("Adding item:", item);
+    call("/api/andnCalendar/todo", "POST", item)
       .then(response => {
-        setItems(response.data);
+        console.log("Add response:", response);
+        setItems(response);
       })
-      .catch(error => {
-        console.error("There was an error adding the item!", error);
-      });
+      .catch(error => console.error("There was an error adding the item!", error));
+  };
+  
+  const update = (item) => {
+    console.log("Updating item:", item);
+    call(`/api/andnCalendar/todo/${item.id}`, "PATCH", item)
+      .then(response => {
+        console.log("Update response:", response);
+        setItems(response);
+      })
+      .catch(error => console.error("There was an error updating the item!", error));
   };
 
   const deleteItem = (item) => {
-    axios.delete(`${API_BASE_URL}/api/andnCalendar/todo/${item.id}`)
-      .then(response => {
-        setItems(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error deleting the item!", error);
-      });
-  };
-
-  const update = (item) => {
-    axios.patch(`${API_BASE_URL}/api/andnCalendar/todo/${item.id}`, item)
-      .then(response => {
-        setItems(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error updating the item!", error);
-      });
+    call(`/api/andnCalendar/todo/${item.id}`, "DELETE", item)
+      .then(response => setItems(response))
+      .catch(error => console.error("There was an error deleting the item!", error));
   };
 
 
@@ -237,17 +232,21 @@ export default function EventModal() {
         title,
         description,
         label: selectedLabel,
-        startDate,
-        endDate,
-        id: selectedEvent ? selectedEvent.id : Date.now(),  // 이벤트 ID 설정
+        startDate: new Date(startDate).toISOString().replace('Z', '+00:00'), // ISO 형식 변환
+        endDate: new Date(endDate).toISOString().replace('Z', '+00:00'),     // ISO 형식 변환
+        //id: selectedEvent ? selectedEvent.id : Date.now(),  // 이벤트 ID 설정
       };
+
+      // 로그를 통해 요청 바디 확인
+      //console.log("Submitting event:", calendarEvent.id);
       // 선택된 이벤트가 있으면 업데이트, 없으면 새 이벤트 추가
       if(selectedEvent) {
-        dispatchCalEvent({ type: "update", payload: calendarEvent });
+        dispatchCalEvent({ type: "update", payload: calendarEvent,  });
       } else {
         dispatchCalEvent({ type: "push", payload: calendarEvent });
       }
       
+      add(calendarEvent);
       setShowEventModal(false); // 모달 닫기
     }
     
@@ -263,6 +262,7 @@ export default function EventModal() {
                  <span 
                  onClick={() => {
                   dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
+                  deleteItem(selectedEvent);
                   setShowEventModal(false);
                 }} 
                  className="material-icons-outlined text-gray-400 cursor-pointer">
@@ -338,7 +338,7 @@ export default function EventModal() {
                   type="date"
                   name="endDate"
                   value={endDate}
-                  className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
+                  className="pt-3 border-0 text-gray-600 pb-2 w-full sborder-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
                   onChange={(e) => setEndDate(e.target.value)}  // 종료 날짜 입력 필드
                 />
             </div>
