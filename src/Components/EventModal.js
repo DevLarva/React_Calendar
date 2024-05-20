@@ -133,7 +133,7 @@
 
 
 
-import React, { useContext, useState } from 'react'; // React와 useContext, useState 훅을 import
+import React, { useContext, useState, useEffect } from 'react'; // React와 useContext, useState 훅을 import
 import GlobalContext from '../context/GlobalContext'; // 전역 콘텍스트 import
 import dayjs from 'dayjs'; // dayjs 라이브러리 import
 
@@ -177,6 +177,31 @@ export default function EventModal() {
     const [endDate, setEndDate] = useState(
       selectedEvent ? dayjs(selectedEvent.endDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
     );
+
+
+    useEffect(() => {
+      call("/api/andnCalendar/todo", "GET", null).then((response) => 
+          setItems(response)
+      );
+  }, []);
+
+  const add = (item) => {
+      call("/api/andnCalendar/todo", "POST", item).then((response) => 
+          setItems(response)
+      );
+  };
+
+  const deleteItem = (item) => {
+      call(`/api/andnCalendar/todo/${item.id}`, "DELETE", item).then((response) => 
+          setItems(response)
+      );
+  };
+
+  const update = (item) => {
+      call(`/api/andnCalendar/todo/${item.id}`, "PATCH", item).then((response) => 
+          setItems(response)
+      );
+  };
 
     // 폼 제출 시 호출되는 함수
     function handleSubmit(e) {
