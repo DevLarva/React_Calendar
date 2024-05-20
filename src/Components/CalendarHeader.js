@@ -28,14 +28,19 @@ export default function CalendarHeaders() {
             ? monthIndex + Math.random()
             : dayjs().month())
         }
+
+        function handleRefresh() {
+            window.location.reload();
+        }
     // 캘린더 헤더 
     return (
         <header className="px-4 py2 flex items-center">
-            <img src= {logo} alt="And N" className="mr-2 w-12 h-12"/>
-            <h1 className="mr-10 tex-2xl text-black-500 font-sans font-bold ">
-                And N
-            </h1>
-            
+            <div className="flex items-center cursor-pointer" onClick={handleRefresh}>
+                <img src= {logo} alt="And N" className="mr-2 w-12 h-12"/>
+                <h1 className="mr-10 tex-2xl text-black-500 font-sans font-bold ">
+                    And N
+                </h1>
+            </div>
             {/* 이전 달로 이동하는 버튼을 렌더링. */}
             <button onClick={handlePrevMonth}>
                 <span className="material-icons-outlined cursor-pointer text-gray-600 mx-2" >
