@@ -133,22 +133,11 @@
 
 
 
-import React, { useContext, useState, useEffect } from 'react'; 
-import GlobalContext from '../context/GlobalContext'; // 전역 콘텍스트 import
-import dayjs from 'dayjs'; // dayjs 라이브러리 import
-import axios from 'axios';
+import React, { useContext, useState, useEffect } from 'react';
+import GlobalContext from '../context/GlobalContext'; 
+import dayjs from 'dayjs'; 
 import { call } from './ApiService';
 
-// API Base URL 설정
-let backendHost;
-const hostname = window && window.location && window.location.hostname;
-console.log("host name,", hostname)
-if (hostname === "localhost") {
-  backendHost = "http://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com";
-}
-export const API_BASE_URL = `${backendHost}`;
-
-// 라벨 색상 배열 정의
 const labelsClasses = [
   "indigo",
   "gray",
@@ -159,99 +148,72 @@ const labelsClasses = [
 ];
 
 export default function EventModal() {
-  // 전역 컨텍스트에서 필요한 값들을 가져옴
   const {
-    setShowEventModal,  // 모달을 닫는 함수
-    daySelected,        // 선택된 날의 정보
-    dispatchCalEvent,   // 캘린더 이벤트를 업데이트하는 함수
-    selectedEvent       // 선택된 이벤트의 정보
-  }  = useContext(GlobalContext);
+    setShowEventModal,
+    daySelected,
+    dispatchCalEvent,
+    selectedEvent
+  } = useContext(GlobalContext);
 
-  // 이벤트 제목 상태를 정의하고, 선택된 이벤트가 있으면 그 제목으로 초기화
   const [title, setTitle] = useState(
     selectedEvent ? selectedEvent.title : ""
   );
-  // 이벤트 설명 상태를 정의하고, 선택된 이벤트가 있으면 그 설명으로 초기화
   const [description, setDescription] = useState(
     selectedEvent ? selectedEvent.description : ""
   );
-  // 선택된 라벨 상태 정의, 선택된 이벤트가 있으면 그 라벨로 초기화
   const [selectedLabel, setSelectedLabel] = useState(
-    selectedEvent ? labelsClasses.find((lbl) => 
-    lbl === selectedEvent.label) : labelsClasses[0]
+    selectedEvent ? labelsClasses.find((lbl) => lbl === selectedEvent.label) : labelsClasses[0]
   );
-  // 이벤트 시작 날짜 상태 정의, 선택된 이벤트가 있으면 그 시작 날짜로 초기화
   const [startDate, setStartDate] = useState(
     selectedEvent ? dayjs(selectedEvent.startDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
   );
-  // 이벤트 종료 날짜 상태 정의, 선택된 이벤트가 있으면 그 종료 날짜로 초기화
   const [endDate, setEndDate] = useState(
     selectedEvent ? dayjs(selectedEvent.endDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
   );
-  const [items, setItems] = useState([]);
 
-  useEffect(() => {
-    call("/api/andnCalendar/todo", "GET", null)
-      .then(response => setItems(response))
-      .catch(error => console.error("There was an error fetching the data!", error));
-  }, []);
-
-  // API 호출 함수들
   const add = (item) => {
-    console.log("Adding item:", item);
     call("/api/andnCalendar/todo", "POST", item)
       .then(response => {
-        console.log("Add response:", response);
-        console.log("id:", item.id);
-        setItems(response);
+        dispatchCalEvent({ type: "push", payload: response });
       })
       .catch(error => console.error("There was an error adding the item!", error));
   };
-  
+
   const update = (item) => {
-    console.log("Updating item:", item);
     call(`/api/andnCalendar/todo/${item.id}`, "PATCH", item)
       .then(response => {
-        console.log("Update response:", response);
-        setItems(response);
+        dispatchCalEvent({ type: "update", payload: response });
       })
       .catch(error => console.error("There was an error updating the item!", error));
   };
 
   const deleteItem = (item) => {
-    call(`/api/andnCalendar/todo/${item.id}`, "DELETE", item)
-      .then(response => setItems(response))
+    call(`/api/andnCalendar/todo/${item.id}`, "DELETE")
+      .then(() => {
+        dispatchCalEvent({ type: "delete", payload: item });
+      })
       .catch(error => console.error("There was an error deleting the item!", error));
-      console.log("Delete item id:", item.id);
   };
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    const calendarEvent = {
+      id: selectedEvent ? selectedEvent.id : null,
+      title,
+      description,
+      label: selectedLabel,
+      startDate: new Date(startDate).toISOString().replace('Z', '+00:00'),
+      endDate: new Date(endDate).toISOString().replace('Z', '+00:00'),
+    };
 
-    // 폼 제출 시 호출되는 함수
-    function handleSubmit(e) {
-      e.preventDefault();  // 폼 제출 시 페이지 리로드 방지
-      // 이벤트 객체 생성
-      const calendarEvent = {
-        title,
-        description,
-        label: selectedLabel,
-        startDate: new Date(startDate).toISOString().replace('Z', '+00:00'), // ISO 형식 변환
-        endDate: new Date(endDate).toISOString().replace('Z', '+00:00'),     // ISO 형식 변환
-      };
-
-      // 로그를 통해 요청 바디 확인
-      //console.log("Submitting event:", calendarEvent.id);
-      // 선택된 이벤트가 있으면 업데이트, 없으면 새 이벤트 추가
-      if(selectedEvent) {
-        dispatchCalEvent({ type: "update", payload: calendarEvent });
-        update(calendarEvent);
-      } else {
-        dispatchCalEvent({ type: "push", payload: calendarEvent });
-        add(calendarEvent);
-      }
-      
-      
-      setShowEventModal(false); // 모달 닫기
+    if (selectedEvent) {
+      update(calendarEvent);
+    } else {
+      add(calendarEvent);
     }
+
+    setShowEventModal(false);
+  }
     
   return (
     <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center"> {/* 화면 전체를 덮는 모달 */}
@@ -264,7 +226,7 @@ export default function EventModal() {
               {selectedEvent && (
                  <span 
                  onClick={() => {
-                  // dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
+                  dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
                   deleteItem(selectedEvent);
                   console.log("Delete item id:", update.call.id); 
                   setShowEventModal(false);
