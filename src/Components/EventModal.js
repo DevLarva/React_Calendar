@@ -202,6 +202,7 @@ export default function EventModal() {
     call("/api/andnCalendar/todo", "POST", item)
       .then(response => {
         console.log("Add response:", response);
+        console.log("id:", item.id);
         setItems(response);
       })
       .catch(error => console.error("There was an error adding the item!", error));
@@ -221,6 +222,7 @@ export default function EventModal() {
     call(`/api/andnCalendar/todo/${item.id}`, "DELETE", item)
       .then(response => setItems(response))
       .catch(error => console.error("There was an error deleting the item!", error));
+      console.log("Delete item id:", item.id);
   };
 
 
@@ -234,19 +236,20 @@ export default function EventModal() {
         label: selectedLabel,
         startDate: new Date(startDate).toISOString().replace('Z', '+00:00'), // ISO 형식 변환
         endDate: new Date(endDate).toISOString().replace('Z', '+00:00'),     // ISO 형식 변환
-        //id: selectedEvent ? selectedEvent.id : Date.now(),  // 이벤트 ID 설정
       };
 
       // 로그를 통해 요청 바디 확인
       //console.log("Submitting event:", calendarEvent.id);
       // 선택된 이벤트가 있으면 업데이트, 없으면 새 이벤트 추가
       if(selectedEvent) {
-        dispatchCalEvent({ type: "update", payload: calendarEvent,  });
+        dispatchCalEvent({ type: "update", payload: calendarEvent });
+        update(calendarEvent);
       } else {
         dispatchCalEvent({ type: "push", payload: calendarEvent });
+        add(calendarEvent);
       }
       
-      add(calendarEvent);
+      
       setShowEventModal(false); // 모달 닫기
     }
     
@@ -261,8 +264,9 @@ export default function EventModal() {
               {selectedEvent && (
                  <span 
                  onClick={() => {
-                  dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
+                  // dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
                   deleteItem(selectedEvent);
+                  console.log("Delete item id:", update.call.id); 
                   setShowEventModal(false);
                 }} 
                  className="material-icons-outlined text-gray-400 cursor-pointer">
