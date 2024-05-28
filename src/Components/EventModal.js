@@ -318,3 +318,7 @@ export default function EventModal() {
     </div>
   );
 }
+
+
+
+//TODO: 색상 수 늘리기 (노션 피드백 1차 배포 결과 참고)

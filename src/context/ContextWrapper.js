@@ -104,3 +104,6 @@ export default function ContextWrapper(props) {
         </GlobalContext.Provider>
     );
 }
+
+
+//TODO: 본인이 쓴 일정 본인만 삭제 가능하게 했으면 좋겠다.(노션 피드백 1차 배포 결과 참고)
