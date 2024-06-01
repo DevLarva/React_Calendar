@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import logo from '../assets/logo.png'
+import Andnlogo from "../assets/andnlogo.png"
 import GlobalContext from "../context/GlobalContext";  //전역 콘텍스트 가져오기
 import dayjs from "dayjs";
 import 'dayjs/locale/ko' //dayjs에서 한글을 사용하기 위해 한국어 설정 불러오기
@@ -36,10 +36,12 @@ export default function CalendarHeaders() {
     return (
         <header className="px-4 py2 flex items-center">
             <div className="flex items-center cursor-pointer" onClick={handleRefresh}>
-                <img src= {logo} alt="And N" className="mr-2 w-12 h-12"/>
-                <h1 className="mr-10 tex-2xl text-black-500 font-sans font-bold ">
-                    And N
-                </h1>
+            <img 
+                    src={Andnlogo} 
+                    alt="And N" 
+                    className="mr-2 h-12 w-19 mt-2 mb-2" //이미지 크기 수정 css
+                    style={{ filter: 'invert(1)' }} // 이미지 색상을 반전시키는 스타일 적용
+                />
             </div>
             {/* 이전 달로 이동하는 버튼을 렌더링. */}
             <button onClick={handlePrevMonth}>
