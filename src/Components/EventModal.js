@@ -138,13 +138,17 @@ import GlobalContext from '../context/GlobalContext';
 import dayjs from 'dayjs'; 
 import { call } from './ApiService';
 
-const labelsClasses = [
-  "indigo",
-  "gray",
+const labelsClasses = [   //색상 추가(6/1)
+  "red",
+  "orange",
+  "yellow",
   "green",
   "blue",
-  "red",
+  "indigo",
   "purple",
+  "gray",
+  "teal",
+  "olive"
 ];
 
 export default function EventModal() {
