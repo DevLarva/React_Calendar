@@ -7,8 +7,8 @@ const labelsClasses = [
   "indigo",
   "purple",
   "gray",
-  "teal",
-  "olive"
+  "pink",
+  "cyan"
 ];
 
 module.exports = {

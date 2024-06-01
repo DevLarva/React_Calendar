@@ -147,8 +147,8 @@ const labelsClasses = [   //색상 추가(6/1)
   "indigo",
   "purple",
   "gray",
-  "teal",
-  "olive"
+  "pink",
+  "cyan"
 ];
 
 export default function EventModal() {
@@ -274,10 +274,10 @@ export default function EventModal() {
                   className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500" 
                   onChange={(e) => setDescription(e.target.value)}  // 설명 입력 필드
                 />
-                <span className="material-icons-outlined text-gray-400">
+                <span className="material-icons-outlined text-gray-400 self-start">
                   bookmark_border
                 </span>
-                <div className="flex gap-x-2">
+                <div className="grid grid-cols-5 gap-2">
                   {labelsClasses.map((lblClass, i) => (
                     <span 
                       key={i} 
