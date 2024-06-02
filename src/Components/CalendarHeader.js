@@ -39,7 +39,7 @@ export default function CalendarHeaders() {
             <img 
                     src={Andnlogo} 
                     alt="And N" 
-                    className="mr-2 h-12 w-19 mt-2 mb-2" //이미지 크기 수정 css
+                    className="mr-2 h-10 mt-2 mb-2" //이미지 크기 수정 css
                     style={{ filter: 'invert(1)' }} // 이미지 색상을 반전시키는 스타일 적용
                 />
             </div>
@@ -67,4 +67,5 @@ export default function CalendarHeaders() {
 
 // dayjs 한글 적용하기 아래 링크 참고
 // https://ordinary-code.tistory.com/155
-// 헤더 부분 추후 수정 필요
+// 헤더 부분 추후 수정 필요(Done)
+// TODO:헤더 이미지 수정 필요 
