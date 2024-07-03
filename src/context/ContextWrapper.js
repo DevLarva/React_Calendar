@@ -46,7 +46,7 @@ export default function ContextWrapper(props) {
             })
             .catch(error => console.error('Error fetching events:', error));
     }, []); // Execute only once when the component mounts
-    
+
     useEffect(() => {
         if (!showEventModal) {
             setSelectedEvent(null);

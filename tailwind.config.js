@@ -14,7 +14,7 @@ const labelsClasses = [
 module.exports = {
   purge: {
     content: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
-  
+
     safelist: [
       ...labelsClasses.map((lbl) => `bg-${lbl}-500`),
       ...labelsClasses.map((lbl) => `bg-${lbl}-200`),
