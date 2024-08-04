@@ -2,13 +2,13 @@ import React, { useContext } from 'react'
 import GlobalContext from '../context/GlobalContext'
 
 export default function Labels() {
-    const { labels, updateLabel } = useContext(GlobalContext);  // GlobalContext에서 labels와 updateLabel을 가져옴.
+    const { labels, display, updateLabel } = useContext(GlobalContext);  // GlobalContext에서 labels와 updateLabel을 가져옴.
     return (
         <React.Fragment>
             <p className="text-gray-500 font-bold mt-10">
                 필터
             </p>
-            {labels.map(({ label: lbl, checked }, idx) => ( // labels 배열을 순회하며 각 라벨을 표시합니다.
+            {labels.map(({ label: lbl, display, checked }, idx) => ( // labels 배열을 순회하며 각 라벨을 표시합니다.
                 <label key={idx} className="items-center mt-3 block">  {/* 라벨을 표시하기 위한 레이블을 설정합니다. */}
                     <input
                         type="checkbox" //체크박스
@@ -24,3 +24,7 @@ export default function Labels() {
         </React.Fragment>
     );
 }
+
+
+
+

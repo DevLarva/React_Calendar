@@ -8,37 +8,37 @@ dayjs.locale('ko')
 
 // 캘린더 헤더 컴포넌트 정의
 export default function CalendarHeaders() {
-        // 전역 컨텍스트에서 monthIndex와 setMonthIndex를 가져옴.
-        const {monthIndex, setMonthIndex} = useContext(GlobalContext);
-        
+    // 전역 컨텍스트에서 monthIndex와 setMonthIndex를 가져옴.
+    const { monthIndex, setMonthIndex } = useContext(GlobalContext);
 
-        //이전 달 이동 함수
-        function handlePrevMonth() {    
-            setMonthIndex(monthIndex -1);
-        }
-        //다음 달 이동 함수
-        function handleNextMonth() {
-            setMonthIndex(monthIndex +1);
-        }
-        //오늘 날짜로 이동하는 함수
-        function handleReset() {
-            // 만약 monthIndex가 현재 월과 같다면 무작위로 monthIndex를 조정.
-            // 그렇지 않다면 현재 월로 설정.
-            setMonthIndex(monthIndex === dayjs().month() 
+
+    //이전 달 이동 함수
+    function handlePrevMonth() {
+        setMonthIndex(monthIndex - 1);
+    }
+    //다음 달 이동 함수
+    function handleNextMonth() {
+        setMonthIndex(monthIndex + 1);
+    }
+    //오늘 날짜로 이동하는 함수
+    function handleReset() {
+        // 만약 monthIndex가 현재 월과 같다면 무작위로 monthIndex를 조정.
+        // 그렇지 않다면 현재 월로 설정.
+        setMonthIndex(monthIndex === dayjs().month()
             ? monthIndex + Math.random()
             : dayjs().month())
-        }
+    }
 
-        function handleRefresh() {
-            window.location.reload();
-        }
+    function handleRefresh() {
+        window.location.reload();
+    }
     // 캘린더 헤더 
     return (
         <header className="px-4 py2 flex items-center">
             <div className="flex items-center cursor-pointer" onClick={handleRefresh}>
-            <img 
-                    src={Andnlogo} 
-                    alt="And N" 
+                <img
+                    src={Andnlogo}
+                    alt="And N"
                     className="mr-2 h-10 mt-2 mb-2" //이미지 크기 수정 css
                     style={{ filter: 'invert(1)' }} // 이미지 색상을 반전시키는 스타일 적용
                 />
@@ -53,7 +53,7 @@ export default function CalendarHeaders() {
                 오늘
             </button>
             <button onClick={handleNextMonth}>
-                <span className="material-icons-outlined cursor-pointer text-gray-600 mx-2">                 
+                <span className="material-icons-outlined cursor-pointer text-gray-600 mx-2">
                     chevron_right
                 </span>
             </button>
