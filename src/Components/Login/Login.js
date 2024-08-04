@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import GlobalContext from './Context/GlobalContext';
+import GlobalContext from './Context/LoginContext';
 import { Box, TextField, Button, Container, Typography, Paper, Grid, InputAdornment, IconButton, Divider } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';

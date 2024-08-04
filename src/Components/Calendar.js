@@ -9,7 +9,7 @@ export default function Calendar() {
     const { savedEvents, daySelected } = useContext(GlobalContext);
 
     function getEventsForDay(day) {
-        return savedEvents.filter(event => 
+        return savedEvents.filter(event =>
             day.isBetween(dayjs(event.startDate), dayjs(event.endDate), 'day', '[]')
         );
     }
@@ -31,11 +31,11 @@ export default function Calendar() {
                     <div key={dayIndex} className="border p-2">
                         <p>{day.format('D')}</p>
                         {events.map(event => (
-                            <span 
-                                key={event.id} 
+                            <span
+                                key={event.id}
                                 className={`bg-${event.label}-500 p-1 rounded block`}
-                                style={{ 
-                                    gridColumnStart: dayIndex + startDay + 1, 
+                                style={{
+                                    gridColumnStart: dayIndex + startDay + 1,
                                     gridColumnEnd: `span ${dayjs(event.endDate).diff(dayjs(event.startDate), 'day') + 1}`
                                 }}
                             >

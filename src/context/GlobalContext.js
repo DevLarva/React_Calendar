@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useState, useEffect, useReducer, useMemo, createContext } from "react";
+import dayjs from "dayjs";
+import { call } from '../Components/ApiService';
 
-//이것도 아래 링크 참고
-//React의 createContext 함수를 사용하여 GlobalContext라는 콘텍스트를 생성하고 있다.
-//이 콘텍스트는 애플리케이션 전체에서 상태와 함수를 공유하는 데 사용, 초기 상태 값과 해당 값을 설정하는 함수들이 포함됩니다.
-
-const GlobalContext = React.createContext({
+// GlobalContext를 생성합니다.
+const GlobalContext = createContext({
     monthIndex: 0, // 현재 월의 인덱스를 저장합니다.
     setMonthIndex: (index) => { }, // 월 인덱스를 설정하는 함수입니다.
     smallCalendarMonth: 0, // 작은 캘린더의 월을 저장합니다.
@@ -23,7 +22,101 @@ const GlobalContext = React.createContext({
     filteredEvents: [], // 필터링된 이벤트들을 저장합니다.
 });
 
+function savedEventsReducer(state, { type, payload }) {
+    switch (type) {
+        case "push":
+            return [...state, payload];
+        case "update":
+            return state.map((evt) => evt.id === payload.id ? payload : evt);
+        case "delete":
+            return state.filter((evt) => evt.id !== payload.id);
+        case "set":
+            return payload;
+        default:
+            throw new Error();
+    }
+}
+
+export const GlobalContextProvider = ({ children }) => {
+    const [monthIndex, setMonthIndex] = useState(dayjs().month());
+    const [smallCalendarMonth, setSmallCalendarMonth] = useState(null);
+    const [daySelected, setDaySelected] = useState(dayjs());
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [labels, setLabels] = useState([]);
+    const [savedEvents, dispatchCalEvent] = useReducer(savedEventsReducer, []);
+
+    function updateLabel(label) {
+        setLabels(labels.map((lbl) => lbl.label === label.label ? label : lbl));
+    }
+
+    const filteredEvents = useMemo(() => {
+        return savedEvents.filter(evt => labels.filter(lbl => lbl.checked)
+            .map(lbl => lbl.label).includes(evt.label)
+        );
+    }, [savedEvents, labels]);
+
+    useEffect(() => {
+        call("/api/andnCalendar/todo", "GET")
+            .then(response => {
+                dispatchCalEvent({ type: "set", payload: response });
+                console.log("Fetched events:", response);
+            })
+            .catch(error => console.error('Error fetching events:', error));
+    }, []);
+
+    useEffect(() => {
+        if (!showEventModal) {
+            setSelectedEvent(null);
+        }
+    }, [showEventModal]);
+
+    useEffect(() => {
+        setLabels((prevLabels) => {
+            const uniqueLabels = [...new Set(savedEvents.map(evt => evt.label))];
+            return uniqueLabels.map(label => {
+                const currentLabel = prevLabels.find(lbl => lbl.label === label);
+                return {
+                    label,
+                    checked: currentLabel ? currentLabel.checked : true,
+                };
+            });
+        });
+    }, [savedEvents]);
+
+    const addEvent = (event) => {
+        call("/api/andnCalendar/todo", "POST", event)
+            .then(response => {
+                dispatchCalEvent({ type: "push", payload: response });
+            })
+            .catch(error => console.error('Error adding event:', error));
+    };
+
+    return (
+        <GlobalContext.Provider
+            value={{
+                monthIndex,
+                setMonthIndex,
+                smallCalendarMonth,
+                setSmallCalendarMonth,
+                daySelected,
+                setDaySelected,
+                showEventModal,
+                setShowEventModal,
+                dispatchCalEvent,
+                savedEvents,
+                selectedEvent,
+                setSelectedEvent,
+                labels,
+                setLabels,
+                updateLabel,
+                filteredEvents,
+                addEvent
+            }}
+        >
+            {children}
+        </GlobalContext.Provider>
+    );
+};
+
 export default GlobalContext;
-
-
-// 참고 링크 (https://ko.legacy.reactjs.org/docs/context.html#reactcreatecontext)
