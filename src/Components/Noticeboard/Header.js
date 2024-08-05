@@ -4,7 +4,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
-import Andnlogo from '../assets/andnlogo.png';
+import Andnlogo from '../../assets/andnlogo.png';
 
 export default function Header() {
     function handleRefresh() {

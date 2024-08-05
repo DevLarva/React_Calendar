@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from "../api/api";  // API utility file
+import api from "../../api";  // API utility file
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Typography, Box } from '@mui/material';
 
 function PostList() {
