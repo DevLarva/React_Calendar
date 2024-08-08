@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import SearchBar from './SearchBar';
 import PostList from './PostList';
 import NewPostButton from './NewPostButton';
@@ -46,18 +46,20 @@ function Main() {
 
     return (
         <>
-            <Box my={4}>
-                <SearchBar
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
-                    searchCriteria={searchCriteria}
-                    setSearchCriteria={setSearchCriteria}
-                />
-            </Box>
-            <Box my={4} sx={{ position: 'relative' }}>
-                <PostList posts={filteredPosts} />
-                <NewPostButton onClick={handleNewPostClick} />
-            </Box>
+            <Container>
+                <Box my={4}>
+                    <SearchBar
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        searchCriteria={searchCriteria}
+                        setSearchCriteria={setSearchCriteria}
+                    />
+                </Box>
+                <Box my={4} sx={{ position: 'relative' }}>
+                    <PostList posts={filteredPosts} />
+                    <NewPostButton onClick={handleNewPostClick} />
+                </Box>
+            </Container>
         </>
     );
 }

@@ -29,11 +29,15 @@
 // };
 
 import React, { useState, useEffect } from 'react';
-import { getOutsourcingArticles } from '../../api';
+import { Box, Container } from '@mui/material';
 import PostList from './PostList'; // PostList 컴포넌트 import
+import NewPostButton from './NewPostButton'; // NewPostButton 컴포넌트 import
+import { getOutsourcingArticles } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 function ClientPostList() {
     const [posts, setPosts] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -47,7 +51,18 @@ function ClientPostList() {
         fetchPosts();
     }, []);
 
-    return <PostList posts={posts} />;
+    const handleNewPostClick = () => {
+        navigate('/newpost');
+    };
+
+    return (
+        <Container>
+            <Box my={4} sx={{ position: 'relative' }}>
+                <PostList posts={posts} />
+                <NewPostButton onClick={handleNewPostClick} />
+            </Box>
+        </Container>
+    );
 }
 
 export default ClientPostList;
