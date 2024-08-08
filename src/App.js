@@ -60,8 +60,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Components/Noticeboard/Header';
 import Main from './Components/Noticeboard/Main';
 import PostView from './Components/Noticeboard/PostView';
@@ -102,22 +101,35 @@ function CalendarApp() {
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+
+  // 특정 경로에서만 Header를 렌더링
+  const showHeader = ['/client', '/calendar', '/client/posts', '/OutsourcingMain'].includes(location.pathname);
+
+  return (
+    <>
+      {showHeader && <Header />}
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
+        <Route path="/client" element={<ClientPostList />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
+        <Route path="/client/posts" element={<PrivateRoute><ClientPostView /></PrivateRoute>} />
+        <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
+      </Routes>
+    </>
+  );
+}
+
 function App() {
   return (
     <CombinedContextProvider>
       <Router>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
-          <Route path="/client" element={<ClientPostList />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
-          <Route path="/client/posts" element={<PrivateRoute><ClientPostView /></PrivateRoute>} />
-          <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
-        </Routes>
+        <AppContent />
       </Router>
-    </CombinedContextProvider >
+    </CombinedContextProvider>
   );
 }
 
