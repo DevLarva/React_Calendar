@@ -34,15 +34,15 @@ export default function CalendarHeaders() {
     }
     // 캘린더 헤더 
     return (
-        <header className="px-4 py2 flex items-center">
-            <div className="flex items-center cursor-pointer" onClick={handleRefresh}>
+        <header className="px-4 py-4 flex items-center">
+            {/* <div className="flex items-center cursor-pointer" onClick={handleRefresh}>
                 <img
                     src={Andnlogo}
                     alt="And N"
                     className="mr-2 h-10 mt-2 mb-2" //이미지 크기 수정 css
                     style={{ filter: 'invert(1)' }} // 이미지 색상을 반전시키는 스타일 적용
                 />
-            </div>
+            </div> */}
             {/* 이전 달로 이동하는 버튼을 렌더링. */}
             <button onClick={handlePrevMonth}>
                 <span className="material-icons-outlined cursor-pointer text-gray-600 mx-2" >

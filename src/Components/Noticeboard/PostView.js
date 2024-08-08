@@ -1,15 +1,14 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from "../../api";
-import { useDropzone } from 'react-dropzone';
 import { Paper, Typography, Grid, TextField, Button, Box, Checkbox, FormGroup, FormControlLabel, IconButton } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { ko } from 'date-fns/locale';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'; // Import for CloudUploadIcon
+import DeleteIcon from '@mui/icons-material/Delete'; // Import for DeleteIcon
+import DatePicker from 'react-datepicker'; // Import for DatePicker
+import { ko } from 'date-fns/locale'; // Import for ko locale
+import { useDropzone } from 'react-dropzone'; // Import for useDropzone
+import { savePost, getOutsourcingArticles } from '../../api'; // Named imports from api.js
 
-export default function PostView() {
+export default function PostView({ onPostSaved }) {
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [locate, setLocate] = useState('');
@@ -24,9 +23,10 @@ export default function PostView() {
     const [selectedOutsourcingId, setSelectedOutsourcingId] = useState('');
 
     useEffect(() => {
-        api.get('/api/outsourcing')
+        // Fetch outsourcing options
+        getOutsourcingArticles()
             .then(response => {
-                setOutsourcingOptions(response.data);
+                setOutsourcingOptions(response);
             })
             .catch(error => {
                 console.error('Error fetching outsourcing options:', error);
@@ -37,7 +37,11 @@ export default function PostView() {
         setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     }, []);
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: 'image/*, application/pdf', maxSize: 3145728 });
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        accept: 'image/*, application/pdf',
+        maxSize: 3145728 // 3MB
+    });
 
     const handleFileRemove = (fileToRemove) => {
         setSelectedFiles((prevFiles) => prevFiles.filter(file => file !== fileToRemove));
@@ -60,14 +64,10 @@ export default function PostView() {
                 formData.append('files', file);
             });
 
-            const response = await api.post('/api/andn/article', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            console.log('게시물이 성공적으로 저장되었습니다:', response.data);
-            handleCancel();
-            navigate("/");
+            await savePost(formData); // Use savePost from api.js
+            console.log('게시물이 성공적으로 저장되었습니다');
+            onPostSaved(); // Call the onPostSaved callback
+            navigate('/');
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
@@ -84,8 +84,9 @@ export default function PostView() {
         setSelectedFiles([]);
         setDesigner('');
         setSelectedOutsourcingId('');
-        navigate("/");
+        navigate('/');
     };
+
 
     return (
         <Paper sx={{ p: 3, mt: 3 }}>
@@ -262,6 +263,7 @@ export default function PostView() {
         </Paper>
     );
 }
+
 
 
 
