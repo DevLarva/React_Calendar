@@ -36,7 +36,7 @@ const Login = () => {
                         navigate('/calendar');
                         break;
                     case 'ROLE_CLIENT':
-                        navigate('/ClientPostList');
+                        navigate('/client');
                         break;
                     case 'ROLE_OUTSOURCING':
                         navigate('/OutsourcingMain');

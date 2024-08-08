@@ -78,6 +78,7 @@ import OutsourcingMain from './Components/Login/Main/OutsourcingMain';
 import PrivateRoute from './Components/Login/Context/PrivateRoute';
 import CalendarContext from './context/GlobalContext';
 import { getMonth } from '../src/util';
+import ClientPostView from './Components/Noticeboard/ClientPostView';
 
 function CalendarApp() {
   const [currentMonth, setCurrentMonth] = React.useState(getMonth());
@@ -105,18 +106,18 @@ function App() {
   return (
     <CombinedContextProvider>
       <Router>
-        <Header /> {/* Header가 모든 페이지에 공통으로 포함되어야 하는 경우 */}
+        <Header />
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
-          <Route path="/client/posts" element={<ClientPostList />} />
+          <Route path="/client" element={<ClientPostList />} />
           <Route path="/register" element={<Register />} />
           <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
-          <Route path="/ClientMain" element={<PrivateRoute><ClientMain /></PrivateRoute>} />
+          <Route path="/client/posts" element={<PrivateRoute><ClientPostView /></PrivateRoute>} />
           <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
         </Routes>
       </Router>
-    </CombinedContextProvider>
+    </CombinedContextProvider >
   );
 }
 

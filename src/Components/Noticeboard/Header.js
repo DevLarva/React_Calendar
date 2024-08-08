@@ -4,11 +4,18 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // useNavigate 훅을 import
 import Andnlogo from '../../assets/andnlogo.png';
 
 export default function Header() {
+    const navigate = useNavigate(); // useNavigate 훅을 호출하여 네비게이터 생성
+
     function handleRefresh() {
         window.location.reload();
+    }
+
+    function handleClientClick() {
+        navigate('/client');
     }
 
     return (
@@ -33,7 +40,7 @@ export default function Header() {
                             일정
                         </Typography>
                     </Button>
-                    <Button size='large' sx={{ color: 'black' }}>
+                    <Button size='large' sx={{ color: 'black' }} onClick={handleClientClick}>
                         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                             클라이언트
                         </Typography>
