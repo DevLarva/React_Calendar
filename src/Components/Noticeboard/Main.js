@@ -38,7 +38,7 @@ function Main() {
         try {
             const data = await getArticles();
             setPosts(data);
-            navigate('/');
+            navigate('/client');
         } catch (error) {
             console.error("게시물 가져오기 실패:", error);
         }
