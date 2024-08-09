@@ -34,7 +34,7 @@ export const getArticles = async () => {
 // 외주업체 게시물 목록 가져오기
 export const getOutsourcingArticles = async () => {
     try {
-        const response = await api.get('/api/outsourcing');
+        const response = await api.get('/api/client/documents');
         return response.data;
     } catch (error) {
         console.error("외주업체 글 가져오기 실패:", error);
