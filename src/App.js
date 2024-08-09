@@ -78,6 +78,8 @@ import PrivateRoute from './Components/Login/Context/PrivateRoute';
 import CalendarContext from './context/GlobalContext';
 import { getMonth } from '../src/util';
 import ClientPostView from './Components/Noticeboard/ClientPostView';
+import ClientHeader from './Components/Noticeboard/ClientHeader'
+import PostList from './Components/Noticeboard/PostList';
 
 function CalendarApp() {
   const [currentMonth, setCurrentMonth] = React.useState(getMonth());
@@ -105,16 +107,20 @@ function AppContent() {
   const location = useLocation();
 
   // 특정 경로에서만 Header를 렌더링
-  const showHeader = ['/client', '/calendar', '/client/posts', '/OutsourcingMain'].includes(location.pathname);
+  const showHeader = ['/calendar', '/andn'].includes(location.pathname);
+  const showClientHeader = ['/client', '/client/posts', '/OutsourcingMain'].includes(location.pathname);
 
   return (
     <>
       {showHeader && <Header />}
+      {showClientHeader && <ClientHeader />}
+
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
         <Route path="/client" element={<ClientPostList />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/andn" element={<Main />} />
         <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
         <Route path="/client/posts" element={<PrivateRoute><ClientPostView /></PrivateRoute>} />
         <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />

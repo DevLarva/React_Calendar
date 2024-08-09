@@ -2,7 +2,7 @@ import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { Box } from '@mui/material';
-import Andnlogo from '../assets/andnlogo.png';
+import Andnlogo from '../../assets/andnlogo.png';
 
 export default function Header() {
     function handleRefresh() {

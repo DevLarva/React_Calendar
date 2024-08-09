@@ -26,4 +26,9 @@ export default function PostList({ posts }) {
             </Table>
         </TableContainer>
     );
+}
+
+// Here you set default props
+PostList.defaultProps = {
+    posts: [],
 };

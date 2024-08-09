@@ -67,7 +67,7 @@ export default function PostView({ onPostSaved }) {
             await savePost(formData); // Use savePost from api.js
             console.log('게시물이 성공적으로 저장되었습니다');
             onPostSaved(); // Call the onPostSaved callback
-            navigate('/');
+            navigate('/andn');
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }

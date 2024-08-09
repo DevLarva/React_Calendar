@@ -24,10 +24,10 @@ function Main() {
         fetchPosts();
     }, []);
 
-    const normalizeText = (text) => text.toLowerCase().replace(/\s+/g, '');
+    const normalizeText = (text) => text ? text.toLowerCase().replace(/\s+/g, '') : '';
 
     const filteredPosts = posts.filter(post =>
-        normalizeText(post[searchCriteria]).includes(normalizeText(searchQuery))
+        post[searchCriteria] && normalizeText(post[searchCriteria]).includes(normalizeText(searchQuery))
     );
 
     const handleNewPostClick = () => {
