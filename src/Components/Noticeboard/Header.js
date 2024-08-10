@@ -18,6 +18,9 @@ export default function Header() {
         navigate('/andn');
     }
 
+    function handleCalendarClick() {
+        navigate('/calendar');
+    }
     return (
         <AppBar position="static" sx={{ backgroundColor: '#F1F3F7' }}>
             <Toolbar>
@@ -36,7 +39,7 @@ export default function Header() {
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button size='large' sx={{ color: 'black' }}>
-                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }} onClick={handleCalendarClick}>
                             일정
                         </Typography>
                     </Button>
