@@ -19,7 +19,7 @@ export default function PostList({ posts }) {
                             <TableCell sx={{ width: '10%' }}>{index + 1}</TableCell>
                             <TableCell sx={{ width: '50%' }}>{post.title}</TableCell>
                             <TableCell sx={{ width: '20%' }}>{post.author}</TableCell>
-                            <TableCell sx={{ width: '20%' }}>{post.date}</TableCell>
+                            <TableCell sx={{ width: '20%' }}>{post.date}</TableCell>  {/* 날짜 출력 */}
                         </TableRow>
                     ))}
                 </TableBody>

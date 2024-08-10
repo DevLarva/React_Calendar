@@ -15,7 +15,7 @@ export default function Header() {
     }
 
     function handleClientClick() {
-        navigate('/client');
+        navigate('/andn');
     }
 
     return (
