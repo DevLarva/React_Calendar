@@ -14,6 +14,7 @@ api.interceptors.request.use(config => {
     const token = getToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log("토큰", token)
     }
     return config;
 }, error => {
@@ -42,6 +43,18 @@ export const getOutsourcingArticles = async () => {
     }
 };
 
+// Client 게시물 목록 가져오기
+export const getClientArticles = async () => {
+    try {
+        const response = await api.get('/api/client/documents');
+        console.log("서버 응답:", response);  // 응답 데이터 확인
+        return response.data;
+    } catch (error) {
+        console.error("외주업체 글 가져오기 실패:", error);
+        throw error;
+    }
+};
+
 // 새 게시물 저장하기
 export const savePost = async (formData) => {
     try {
@@ -54,3 +67,19 @@ export const savePost = async (formData) => {
         throw error;
     }
 };
+
+
+// Client 새 게시물 저장하기
+export const saveClientPost = async (formData) => {
+    try {
+        const response = await api.post('/api/client/document', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("게시물 저장 중 오류 발생:", error);
+        throw error;
+    }
+};
+
+

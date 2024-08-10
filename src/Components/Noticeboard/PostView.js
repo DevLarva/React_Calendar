@@ -84,7 +84,7 @@ export default function PostView({ onPostSaved }) {
         setSelectedFiles([]);
         setDesigner('');
         setSelectedOutsourcingId('');
-        navigate('/');
+        navigate('/andn');
     };
 
 

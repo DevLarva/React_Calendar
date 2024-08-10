@@ -72,7 +72,6 @@ import CombinedContextProvider from './context/CombinedContextProvider';
 import EventModal from './Components/EventModal';
 import Login from './Components/Login/Login';
 import Register from './Components/Login/Register';
-import ClientMain from './Components/Login/Main/ClientMain';
 import OutsourcingMain from './Components/Login/Main/OutsourcingMain';
 import PrivateRoute from './Components/Login/Context/PrivateRoute';
 import CalendarContext from './context/GlobalContext';
@@ -80,6 +79,7 @@ import { getMonth } from '../src/util';
 import ClientPostView from './Components/Noticeboard/ClientPostView';
 import ClientHeader from './Components/Noticeboard/ClientHeader'
 import PostList from './Components/Noticeboard/PostList';
+import ClientMain from './Components/Noticeboard/ClientMain';
 
 function CalendarApp() {
   const [currentMonth, setCurrentMonth] = React.useState(getMonth());
@@ -118,11 +118,11 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
-        <Route path="/client" element={<ClientPostList />} />
+        <Route path="/client" element={<ClientMain />} />
         <Route path="/register" element={<Register />} />
         <Route path="/andn" element={<Main />} />
         <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
-        <Route path="/client/posts" element={<PrivateRoute><ClientPostView /></PrivateRoute>} />
+        <Route path="/client/posts" element={<PrivateRoute><ClientPostView onClientPostSaved={() => { }} /></PrivateRoute>} />
         <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
       </Routes>
     </>
@@ -140,3 +140,13 @@ function App() {
 }
 
 export default App;
+
+
+/*
+TODO:
+test3 == Andn
+test6 == Andn
+testc == Client
+
+- Client로 로그인해도 local에서는 Andn으로 뜬다.
+*/

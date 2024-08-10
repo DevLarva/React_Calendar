@@ -3,11 +3,11 @@ import { Box, Container } from '@mui/material';
 import SearchBar from './SearchBar';
 import PostList from './PostList';
 import NewPostButton from './NewPostButton';
-import { getArticles } from '../../api';  // API 호출 관련 함수 import
+import { getClientArticles } from '../../api';  // API 호출 관련 함수 import
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';  // 날짜 변환을 위한 라이브러리
 
-function Main() {
+function ClientMain() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchCriteria, setSearchCriteria] = useState('title');
     const [posts, setPosts] = useState([]);
@@ -16,7 +16,7 @@ function Main() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const data = await getArticles();
+                const data = await getClientArticles();
 
                 // createAt 값을 날짜 형식으로 변환
                 const formattedData = data.map(post => ({
@@ -39,8 +39,23 @@ function Main() {
     );
 
     const handleNewPostClick = () => {
-        navigate('/newpost');
+        navigate('/client/posts');
     };
+
+    // const handlePostSaved = async () => {
+    //     try {
+    //         const data = await getClientArticles();
+    //         const formattedData = data.map(post => ({
+    //             ...post,
+    //             date: dayjs(post.createAt).format('YYYY-MM-DD')
+    //         }));
+    //         setPosts(formattedData);
+    //         navigate('/client');
+    //         console.log("게시글 정보", formattedData);
+    //     } catch (error) {
+    //         console.error("게시물 가져오기 실패:", error);
+    //     }
+    // };
 
     return (
         <>
@@ -62,4 +77,4 @@ function Main() {
     );
 }
 
-export default Main;
+export default ClientMain;

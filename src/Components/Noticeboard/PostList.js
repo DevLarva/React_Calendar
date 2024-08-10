@@ -28,7 +28,7 @@ export default function PostList({ posts }) {
     );
 }
 
-// Here you set default props
+
 PostList.defaultProps = {
     posts: [],
 };

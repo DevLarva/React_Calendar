@@ -1,40 +1,88 @@
-import React, { useState, useCallback } from 'react';
-import { Paper, Typography, Grid, TextField, Button, Box, Container, Divider } from '@mui/material';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Paper, Typography, Grid, TextField, Button, Box, Container, Divider, IconButton } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+import { saveClientPost } from '../../api'; // Assuming saveClientPost is an API function you have set up
 
-export default function ClientPostView() {
-    const [eventName, setEventName] = useState(''); //행사명    
-    const [companyName, setCompanyName] = useState(''); //업체명
-    const [manager, setManager] = useState(''); // 담당자
-    const [callNumber, setCallNumber] = useState('');   //연락처
-    const [location, setLocation] = useState('');   //행사 장소
-    const [boothLayout, setBoothLayout] = useState(''); //부스배치도
-    const [boothmanager, setBoothmanager] = useState(''); // 부스 담당자
-    const [boothcallNumber, setBoothcallNumber] = useState('');   //연락처
-    const [installDate, setInstallDate] = useState(null);   //설치일자
-    const [removeDate, setRemoveDate] = useState(null); // 철수일자
-    const [selectedFiles, setSelectedFiles] = useState([]); //첨부파일
-    const [applicant, setApplicant] = useState('');//신청자
-    const [applicantNum, setApplicantNum] = useState('');//신청자 연락처
-    const [collectionDay, setCollectionDay] = useState('');//수거일시
-    const [collectionLoc, setCollectionLoc] = useState('');//수거장소
-    const [memo, setMemo] = useState('');//메모
+export default function ClientPostView({ onClientPostSaved }) {
+    const [eventName, setEventName] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [manager, setManager] = useState('');
+    const [callNumber, setCallNumber] = useState('');
+    const [location, setLocation] = useState('');
+    const [boothLayout, setBoothLayout] = useState('');
+    const [boothManager, setBoothManager] = useState('');
+    const [boothCallNumber, setBoothCallNumber] = useState('');
+    const [installDate, setInstallDate] = useState(null);
+    const [removeDate, setRemoveDate] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [applicant, setApplicant] = useState('');
+    const [applicantNum, setApplicantNum] = useState('');
+    const [collectionDay, setCollectionDay] = useState('');
+    const [collectionLoc, setCollectionLoc] = useState('');
+    const [memo, setMemo] = useState('');
+    const navigate = useNavigate();
 
+    // useEffect(() => {
+    //     // Fetch outsourcing options
+    //     getClientArticles()
+    //         .then(response => {
+    //             getClientArticles(response);
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching outsourcing options:', error);
+    //         });
+    // }, []);
     const onDrop = useCallback((acceptedFiles) => {
         setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     }, []);
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: 'image/*, application/pdf', maxSize: 3145728 });
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        accept: 'image/*, application/pdf',
+        maxSize: 3145728 // 3MB 
+    });
 
-    const handleSubmit = () => {
-        console.log({
-            eventName, companyName, manager, callNumber, location, boothLayout, boothmanager, boothcallNumber,
-            installDate, removeDate, selectedFiles, applicant, applicantNum, collectionDay, collectionLoc, memo
-        });
+    const handleFileRemove = (fileToRemove) => {
+        setSelectedFiles((prevFiles) => prevFiles.filter(file => file !== fileToRemove));
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('eventName', eventName);
+            formData.append('companyName', companyName);
+            formData.append('manager', manager);
+            formData.append('callNumber', callNumber);
+            formData.append('location', location);
+            formData.append('boothLayout', boothLayout);
+            formData.append('boothManager', boothManager);
+            formData.append('boothCallNumber', boothCallNumber);
+            formData.append('installDate', installDate);
+            formData.append('removeDate', removeDate);
+            formData.append('applicant', applicant);
+            formData.append('applicantNum', applicantNum);
+            formData.append('collectionDay', collectionDay);
+            formData.append('collectionLoc', collectionLoc);
+            formData.append('memo', memo);
+
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            await saveClientPost(formData); // Call API to save the post
+            console.log('게시물이 성공적으로 저장되었습니다');
+            onClientPostSaved();
+            navigate('/client');
+
+        } catch (error) {
+            console.error('게시물 저장 중 오류 발생:', error);
+        }
     };
 
     const handleCancel = () => {
@@ -44,8 +92,8 @@ export default function ClientPostView() {
         setCallNumber('');
         setLocation('');
         setBoothLayout('');
-        setBoothmanager('');
-        setBoothcallNumber('');
+        setBoothManager('');
+        setBoothCallNumber('');
         setInstallDate(null);
         setRemoveDate(null);
         setSelectedFiles([]);
@@ -54,6 +102,7 @@ export default function ClientPostView() {
         setCollectionDay('');
         setCollectionLoc('');
         setMemo('');
+        navigate('/client');
     };
 
     return (
@@ -142,8 +191,8 @@ export default function ClientPostView() {
                             label="담당자"
                             variant="outlined"
                             fullWidth
-                            value={boothmanager}
-                            onChange={(e) => setBoothmanager(e.target.value)}
+                            value={boothManager}
+                            onChange={(e) => setBoothManager(e.target.value)}
                             required
                             autoComplete="off"
                         />
@@ -153,8 +202,8 @@ export default function ClientPostView() {
                             label="연락처"
                             variant="outlined"
                             fullWidth
-                            value={boothcallNumber}
-                            onChange={(e) => setBoothcallNumber(e.target.value)}
+                            value={boothCallNumber}
+                            onChange={(e) => setBoothCallNumber(e.target.value)}
                             required
                             autoComplete="off"
                         />
@@ -197,9 +246,14 @@ export default function ClientPostView() {
                         {selectedFiles.length > 0 && (
                             <Box mt={2}>
                                 {selectedFiles.map((file, index) => (
-                                    <Typography key={index} variant="body2">
-                                        선택된 파일: {file.name}
-                                    </Typography>
+                                    <Box key={index} display="flex" alignItems="center" justifyContent="space-between">
+                                        <Typography variant="body2">
+                                            {file.name}
+                                        </Typography>
+                                        <IconButton onClick={() => handleFileRemove(file)}>
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Box>
                                 ))}
                             </Box>
                         )}
