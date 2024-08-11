@@ -14,7 +14,9 @@ api.interceptors.request.use(config => {
     const token = getToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log("토큰", token)
+        console.log("요청에 첨부된 토큰:", token);  // 디버그 로그
+    } else {
+        console.error("토큰을 찾을 수 없습니다");
     }
     return config;
 }, error => {
@@ -82,4 +84,13 @@ export const saveClientPost = async (formData) => {
     }
 };
 
-
+// AndN 게시물 상세보기 페이지
+export const getArticleById = async (id) => {
+    try {
+        const response = await axios.patch(`/api/articles/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching article:', error);
+        throw error;
+    }
+};

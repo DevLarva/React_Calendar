@@ -80,6 +80,7 @@ import ClientPostView from './Components/Noticeboard/ClientPostView';
 import ClientHeader from './Components/Noticeboard/ClientHeader'
 import PostList from './Components/Noticeboard/PostList';
 import ClientMain from './Components/Noticeboard/ClientMain';
+import PostDetail from './Components/Noticeboard/PostDetail';
 
 function CalendarApp() {
   const [currentMonth, setCurrentMonth] = React.useState(getMonth());
@@ -106,7 +107,6 @@ function CalendarApp() {
 function AppContent() {
   const location = useLocation();
 
-  // 특정 경로에서만 Header를 렌더링
   const showHeader = ['/calendar', '/andn'].includes(location.pathname);
   const showClientHeader = ['/client', '/client/posts', '/OutsourcingMain'].includes(location.pathname);
 
@@ -116,6 +116,7 @@ function AppContent() {
       {showClientHeader && <ClientHeader />}
 
       <Routes>
+        {/* 기존 라우트들 */}
         <Route path="/" element={<Login />} />
         <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
         <Route path="/client" element={<ClientMain />} />
@@ -124,6 +125,9 @@ function AppContent() {
         <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
         <Route path="/client/posts" element={<PrivateRoute><ClientPostView onClientPostSaved={() => { }} /></PrivateRoute>} />
         <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
+
+        {/* 상세보기 페이지 라우트 추가 */}
+        <Route path="/client/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
       </Routes>
     </>
   );

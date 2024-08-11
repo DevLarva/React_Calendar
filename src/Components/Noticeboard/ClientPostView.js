@@ -71,9 +71,9 @@ export default function ClientPostView({ onClientPostSaved }) {
             formData.append('collectionLoc', collectionLoc);
             formData.append('memo', memo);
 
-            selectedFiles.forEach(file => {
-                formData.append('files', file);
-            });
+            // selectedFiles.forEach(file => {
+            //     formData.append('files', file);
+            // });
 
             await saveClientPost(formData); // Call API to save the post
             console.log('게시물이 성공적으로 저장되었습니다');
