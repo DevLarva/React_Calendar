@@ -6,8 +6,9 @@ export default function PostList({ posts }) {
     const navigate = useNavigate();
 
     const handleRowClick = (id) => {
-        navigate(`/client/posts/${id}`);
+        navigate(`/andn/posts/${id}`);
     };
+
 
     return (
         <TableContainer component={Paper}>

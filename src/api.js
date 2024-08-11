@@ -85,12 +85,12 @@ export const saveClientPost = async (formData) => {
 };
 
 // AndN 게시물 상세보기 페이지
-export const getArticleById = async (id) => {
+export const getArticlesDetail = async (id) => {
     try {
-        const response = await axios.patch(`/api/articles/${id}`);
+        const response = await api.get(`/api/andn/articles/${id}`);
         return response.data;
     } catch (error) {
-        console.error('Error fetching article:', error);
+        console.error("게시물 가져오기 실패:", error);
         throw error;
     }
 };

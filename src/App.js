@@ -127,7 +127,7 @@ function AppContent() {
         <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
 
         {/* 상세보기 페이지 라우트 추가 */}
-        <Route path="/client/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
+        <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
       </Routes>
     </>
   );
@@ -152,5 +152,5 @@ test3 == Andn
 test6 == Andn
 testc == Client
 
-- Client로 로그인해도 local에서는 Andn으로 뜬다.
+- 클라이언트 403에러 해결
 */

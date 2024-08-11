@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArticleById } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
+import { getArticlesDetail } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
 
 export default function PostDetail() {
     const { id } = useParams(); // URL 파라미터에서 게시물 ID를 가져옴
@@ -10,7 +10,7 @@ export default function PostDetail() {
 
     useEffect(() => {
         // 게시물 상세정보 가져오기
-        getArticleById(id)
+        getArticlesDetail(id)
             .then(response => {
                 setPost(response);
             })
