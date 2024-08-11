@@ -23,8 +23,8 @@ export default function ClientPostView({ onClientPostSaved }) {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [applicant, setApplicant] = useState('');
     const [applicantNum, setApplicantNum] = useState('');
-    const [collectionDay, setCollectionDay] = useState('');
-    const [collectionLoc, setCollectionLoc] = useState('');
+    const [collectionDay, setCollectionDay] = useState(null);       //확인 요망
+    const [collectionLoc, setCollectionLoc] = useState('');         //확인 요망
     const [memo, setMemo] = useState('');
     const navigate = useNavigate();
 
@@ -71,11 +71,11 @@ export default function ClientPostView({ onClientPostSaved }) {
             formData.append('collectionLoc', collectionLoc);
             formData.append('memo', memo);
 
-            // selectedFiles.forEach(file => {
-            //     formData.append('files', file);
-            // });
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
 
-            await saveClientPost(formData); // Call API to save the post
+            await saveClientPost(formData);
             console.log('게시물이 성공적으로 저장되었습니다');
             onClientPostSaved();
             navigate('/client');
@@ -99,7 +99,7 @@ export default function ClientPostView({ onClientPostSaved }) {
         setSelectedFiles([]);
         setApplicant('');
         setApplicantNum('');
-        setCollectionDay('');
+        setCollectionDay(null);
         setCollectionLoc('');
         setMemo('');
         navigate('/client');
@@ -284,18 +284,17 @@ export default function ClientPostView({ onClientPostSaved }) {
                             autoComplete="off"
                         />
                     </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            label="수거일시"
-                            variant="outlined"
-                            fullWidth
-                            value={collectionDay}
-                            onChange={(e) => setCollectionDay(e.target.value)}
-                            required
+                    <Grid item xs={6}>
+                        <DatePicker
+                            locale={ko}
+                            selected={collectionDay}
+                            onChange={(date) => setCollectionDay(date)}
+                            dateFormat="yyyy/MM/dd"
+                            customInput={<TextField fullWidth label="보관 일시" variant="outlined" />}
                             autoComplete="off"
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             label="수거장소"
                             variant="outlined"

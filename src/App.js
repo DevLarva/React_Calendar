@@ -123,7 +123,7 @@ function AppContent() {
         <Route path="/register" element={<Register />} />
         <Route path="/andn" element={<Main />} />
         <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
-        <Route path="/client/posts" element={<PrivateRoute><ClientPostView onClientPostSaved={() => { }} /></PrivateRoute>} />
+        <Route path="/client/posts" element={<ClientPostView onClientPostSaved={() => { }} />} />
         <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
 
         {/* 상세보기 페이지 라우트 추가 */}
