@@ -52,7 +52,7 @@ export const getClientArticles = async () => {
         console.log("서버 응답:", response);  // 응답 데이터 확인
         return response.data;
     } catch (error) {
-        console.error("외주업체 글 가져오기 실패:", error);
+        console.error("클라이언트 글 가져오기 실패:", error);
         throw error;
     }
 };
@@ -63,6 +63,7 @@ export const savePost = async (formData) => {
         const response = await api.post('/api/andn/article', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
+        console.error("저장 데이터", response.data);
         return response.data;
     } catch (error) {
         console.error("게시물 저장 중 오류 발생:", error);
@@ -88,6 +89,18 @@ export const saveClientPost = async (formData) => {
 export const getArticlesDetail = async (id) => {
     try {
         const response = await api.get(`/api/andn/articles/${id}`);
+        console.log("받아온 데이터", response.data)
+        return response.data;
+    } catch (error) {
+        console.error("게시물 가져오기 실패:", error);
+        throw error;
+    }
+};
+
+// Client 게시물 상세보기 페이지
+export const getClientsDetail = async (id) => {
+    try {
+        const response = await api.get(`/api/client/documents/${id}`);
         console.log("받아온 데이터", response.data)
         return response.data;
     } catch (error) {
