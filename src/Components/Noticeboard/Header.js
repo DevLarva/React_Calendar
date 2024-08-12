@@ -25,8 +25,7 @@ export default function Header() {
 
     function handleLogoutClick() {
         signout()
-        console.log("Logging out...");
-        // 예: navigate('/login');
+        console.log("Logging out");
     }
 
     return (
@@ -54,11 +53,6 @@ export default function Header() {
                     <Button size='large' sx={{ color: 'black' }} onClick={handleClientClick}>
                         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
                             클라이언트
-                        </Typography>
-                    </Button>
-                    <Button size='large' sx={{ color: 'black' }}>
-                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                            알림
                         </Typography>
                     </Button>
 
