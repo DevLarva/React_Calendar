@@ -81,6 +81,7 @@ import ClientHeader from './Components/Noticeboard/ClientHeader'
 import PostList from './Components/Noticeboard/PostList';
 import ClientMain from './Components/Noticeboard/ClientMain';
 import PostDetail from './Components/Noticeboard/PostDetail';
+import ClientPostDetail from './Components/Noticeboard/ClientDetail';
 
 function CalendarApp() {
   const [currentMonth, setCurrentMonth] = React.useState(getMonth());
@@ -128,6 +129,7 @@ function AppContent() {
 
         {/* 상세보기 페이지 라우트 추가 */}
         <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
+        <Route path="/client/posts/:id" element={<PrivateRoute><ClientPostDetail /></PrivateRoute>} />
       </Routes>
     </>
   );
