@@ -5,6 +5,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload'; // Import for Clo
 import DeleteIcon from '@mui/icons-material/Delete'; // Import for DeleteIcon
 import DatePicker from 'react-datepicker'; // Import for DatePicker
 import { ko } from 'date-fns/locale'; // Import for ko locale
+import { format } from 'date-fns'; // Import for ko locale
 import { useDropzone } from 'react-dropzone'; // Import for useDropzone
 import { savePost, getOutsourcingArticles } from '../../api'; // Named imports from api.js
 
@@ -16,7 +17,7 @@ export default function PostView({ onPostSaved }) {
     const [companyName, setCompanyName] = useState('');
     const [boothWidth, setBoothWidth] = useState('');
     const [boothHeight, setBoothHeight] = useState('');
-    const [installDateRange, setInstallDateRange] = useState([null, null]);
+    const [installDate, setInstallDate] = useState(['', '']);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [designer, setDesigner] = useState('');
     const [outsourcingOptions, setOutsourcingOptions] = useState([]);
@@ -56,22 +57,30 @@ export default function PostView({ onPostSaved }) {
             formData.append('companyName', companyName);
             formData.append('boothWidth', boothWidth);
             formData.append('boothHeight', boothHeight);
-            formData.append('installDateRange', installDateRange);
             formData.append('designer', designer);
             formData.append('outsourcingId', selectedOutsourcingId);
+
+            // InstallDate 배열의 각 날짜를 "yyyy-MM-dd" 형식으로 변환하여 FormData에 추가
+            if (installDate[0] && installDate[1]) {
+                const formattedInstallDate = `${format(new Date(installDate[0]), 'yyyy-MM-dd')} ~ ${format(new Date(installDate[1]), 'yyyy-MM-dd')}`;
+                formData.append('installDate', formattedInstallDate);
+            }
 
             selectedFiles.forEach(file => {
                 formData.append('files', file);
             });
 
-            await savePost(formData); // Use savePost from api.js
-            console.log('게시물이 성공적으로 저장되었습니다');
-            onPostSaved(); // Call the onPostSaved callback
+            console.log('FormData 내용 확인:', formData.get('installDate'));
+
+            await savePost(formData); // API 호출
+            onPostSaved(); // 콜백 호출
             navigate('/andn');
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
     };
+
+
 
     const handleCancel = () => {
         setTitle('');
@@ -80,7 +89,7 @@ export default function PostView({ onPostSaved }) {
         setCompanyName('');
         setBoothWidth('');
         setBoothHeight('');
-        setInstallDateRange([null, null]);
+        setInstallDate(['', '']);
         setSelectedFiles([]);
         setDesigner('');
         setSelectedOutsourcingId('');
@@ -171,9 +180,9 @@ export default function PostView({ onPostSaved }) {
                     <DatePicker
                         locale={ko}
                         selectsRange
-                        startDate={installDateRange[0]}
-                        endDate={installDateRange[1]}
-                        onChange={(update) => setInstallDateRange(update)}
+                        startDate={installDate[0]}
+                        endDate={installDate[1]}
+                        onChange={(update) => setInstallDate(update)}
                         dateFormat="yyyy/MM/dd"
                         customInput={<TextField fullWidth label="설치 기간" variant="outlined" />}
                         autoComplete="off"

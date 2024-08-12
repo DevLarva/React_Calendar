@@ -88,6 +88,7 @@ export const saveClientPost = async (formData) => {
 export const getArticlesDetail = async (id) => {
     try {
         const response = await api.get(`/api/andn/articles/${id}`);
+        console.log("받아온 데이터", response.data)
         return response.data;
     } catch (error) {
         console.error("게시물 가져오기 실패:", error);

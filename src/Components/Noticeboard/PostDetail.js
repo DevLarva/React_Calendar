@@ -13,6 +13,7 @@ export default function PostDetail() {
         getArticlesDetail(id)
             .then(response => {
                 setPost(response);
+                console.log("데이터", response)
             })
             .catch(error => {
                 console.error('게시물 불러오기 중 오류 발생:', error);
@@ -21,7 +22,7 @@ export default function PostDetail() {
     }, [id, navigate]);
 
     if (!post) {
-        return <div>로딩 중...</div>;
+        return <div>.</div>;
     }
 
     return (
@@ -46,7 +47,9 @@ export default function PostDetail() {
                 </Grid>
                 <Grid item xs={12}>
                     <Typography variant="body1">
-                        설치 기간: {post.installDateRange[0]} ~ {post.installDateRange[1]}
+                        {post.installDate === null
+                            ? "설치 기간: 사용자가 설정한 설치 기간이 없습니다."
+                            : `설치 기간: ${post.installDate}`}
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
