@@ -59,7 +59,9 @@ export default function EventModal() {
   const deleteItem = (item) => {
     call(`/api/andnCalendar/todo/${item.id}`, "DELETE")
       .then(() => {
+        // 서버에서 삭제가 성공하면, 클라이언트 상태도 업데이트
         dispatchCalEvent({ type: "delete", payload: item });
+        setShowEventModal(false);
       })
       .catch(error => console.error("There was an error deleting the item!", error));
   };
@@ -191,3 +193,4 @@ export default function EventModal() {
 
 
 //TODO: 색상 수 늘리기 (노션 피드백 1차 배포 결과 참고)
+//ERROR: 삭제하고 나서 새로고침하면 계속 삭제한게 출력
