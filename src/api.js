@@ -23,7 +23,7 @@ api.interceptors.request.use(config => {
     return Promise.reject(error);
 });
 
-// 게시물 목록 가져오기
+// 모든 게시물 목록 가져오기
 export const getArticles = async () => {
     try {
         const response = await api.get('/api/andn/articles');
@@ -34,16 +34,16 @@ export const getArticles = async () => {
     }
 };
 
-// 외주업체 게시물 목록 가져오기
-export const getOutsourcingArticles = async () => {
-    try {
-        const response = await api.get('/api/andn/articles');
-        return response.data;
-    } catch (error) {
-        console.error("외주업체 글 가져오기 실패:", error);
-        throw error;
-    }
-};
+// 게시물 목록 가져오기
+// export const getOutsourcingArticles = async () => {
+//     try {
+//         const response = await api.get('/api/andn/articles');
+//         return response.data;
+//     } catch (error) {
+//         console.error("외주업체 글 가져오기 실패:", error);
+//         throw error;
+//     }
+// };
 
 // Client 게시물 목록 가져오기
 export const getClientArticles = async () => {
@@ -117,6 +117,31 @@ export const getOutsourcingUsers = async () => {
         return response.data;
     } catch (error) {
         console.error("외주업체 유저 정보 불러오기 실패:", error);
+        throw error;
+    }
+};
+
+
+// 외주업체 게시물 페이지
+export const getOutsourcingList = async () => {
+    try {
+        const response = await api.get(`/api/outsourcing/articles`);
+        console.log("받아온 데이터", response.data)
+        return response.data;
+    } catch (error) {
+        console.error("외주업체 글목록 불러오기 실패:", error);
+        throw error;
+    }
+};
+
+
+// 외주업체 게시물 상세보기 페이지
+export const getOutsourcingDetail = async (id) => {
+    try {
+        const response = await api.get(`/api/outsourcing/articles/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("외주업체 상세보기 불러오기 실패:", error);
         throw error;
     }
 };

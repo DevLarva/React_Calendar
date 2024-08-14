@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paper, Typography, Grid, TextField, Button, Box, Checkbox, FormGroup, FormControlLabel, IconButton } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'; // Import for CloudUploadIcon
-import DeleteIcon from '@mui/icons-material/Delete'; // Import for DeleteIcon
-import DatePicker from 'react-datepicker'; // Import for DatePicker
-import { ko } from 'date-fns/locale'; // Import for ko locale
-import { format } from 'date-fns'; // Import for ko locale
-import { useDropzone } from 'react-dropzone'; // Import for useDropzone
-import { savePost, getOutsourcingUsers } from '../../api'; // Named imports from api.js
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DatePicker from 'react-datepicker';
+import { ko } from 'date-fns/locale';
+import { format } from 'date-fns';
+import { useDropzone } from 'react-dropzone';
+import { savePost, getOutsourcingUsers } from '../../api';
 
 export default function PostView({ onPostSaved }) {
     const navigate = useNavigate();
@@ -49,6 +49,10 @@ export default function PostView({ onPostSaved }) {
     };
 
     const handleSubmit = async () => {
+        if (!title) {
+            alert('행사명을 입력해주세요.');
+            return;
+        }
         try {
             const formData = new FormData();
             formData.append('title', title);
@@ -78,6 +82,7 @@ export default function PostView({ onPostSaved }) {
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
+
     };
 
 

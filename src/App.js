@@ -72,7 +72,8 @@ import CombinedContextProvider from './context/CombinedContextProvider';
 import EventModal from './Components/EventModal';
 import Login from './Components/Login/Login';
 import Register from './Components/Login/Register';
-import OutsourcingMain from './Components/Login/Main/OutsourcingMain';
+import OutsourcingMain from './Components/Noticeboard/OutsourcingMain';
+import OutsourcingDetail from './Components/Noticeboard/OutsourcingDetail';
 import PrivateRoute from './Components/Login/Context/PrivateRoute';
 import CalendarContext from './context/GlobalContext';
 import { getMonth } from '../src/util';
@@ -130,6 +131,7 @@ function AppContent() {
         {/* 상세보기 페이지 라우트 추가 */}
         <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
         <Route path="/client/posts/:id" element={<PrivateRoute><ClientPostDetail /></PrivateRoute>} />
+        <Route path="/outsourcing/articles/:id" element={<PrivateRoute><OutsourcingDetail /></PrivateRoute>} />
       </Routes>
     </>
   );
