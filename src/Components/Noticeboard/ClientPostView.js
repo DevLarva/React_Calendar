@@ -18,26 +18,16 @@ export default function ClientPostView({ onClientPostSaved }) {
     const [boothLayout, setBoothLayout] = useState('');
     const [boothManager, setBoothManager] = useState('');
     const [boothCallNumber, setBoothCallNumber] = useState('');
-    const [installDate, setInstallDate] = useState(null);
-    const [removeDate, setRemoveDate] = useState(null);
+    const [installDate, setInstallDate] = useState('');
+    const [removeDate, setRemoveDate] = useState('');
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [applicant, setApplicant] = useState('');
     const [applicantNum, setApplicantNum] = useState('');
-    const [collectionDay, setCollectionDay] = useState(null);       //확인 요망
+    const [collectionDay, setCollectionDay] = useState('');       //확인 요망
     const [collectionLoc, setCollectionLoc] = useState('');         //확인 요망
     const [memo, setMemo] = useState('');
     const navigate = useNavigate();
 
-    // useEffect(() => {
-    //     // Fetch outsourcing options
-    //     getClientArticles()
-    //         .then(response => {
-    //             getClientArticles(response);
-    //         })
-    //         .catch(error => {
-    //             console.error('Error fetching outsourcing options:', error);
-    //         });
-    // }, []);
     const onDrop = useCallback((acceptedFiles) => {
         setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     }, []);
@@ -63,11 +53,11 @@ export default function ClientPostView({ onClientPostSaved }) {
             formData.append('boothLayout', boothLayout);
             formData.append('boothManager', boothManager);
             formData.append('boothCallNumber', boothCallNumber);
-            formData.append('installDate', installDate);
-            formData.append('removeDate', removeDate);
+            formData.append('installDate', installDate, installDate.toString());
+            formData.append('removeDate', removeDate, removeDate.toString());
             formData.append('applicant', applicant);
             formData.append('applicantNum', applicantNum);
-            formData.append('collectionDay', collectionDay);
+            formData.append('collectionDay', collectionDay, collectionDay.toString());
             formData.append('collectionLoc', collectionLoc);
             formData.append('memo', memo);
 

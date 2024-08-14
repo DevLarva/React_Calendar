@@ -1,28 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box, Divider, Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArticlesDetail } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
+import { getArticlesDetail } from '../../api'; // API call to fetch article details
 
 export default function PostDetail() {
-    const { id } = useParams(); // URL 파라미터에서 게시물 ID를 가져옴
+    const { id } = useParams(); // Get the post ID from the URL parameters
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
+    const downloadImage = async (filename) => {
+        const url = process.env.REACT_APP_API_URL + "/api/file/image/download?filename=" + filename;
+        const download = document.createElement('a');
 
+        download.href = url;
+        download.setAttribute('download', filename);
+        download.setAttribute('type', 'application/json');
+        download.click();
+    }
     useEffect(() => {
-        // 게시물 상세정보 가져오기
+        // Fetch post details
         getArticlesDetail(id)
             .then(response => {
                 setPost(response);
-                console.log("데이터", response);
+                console.log("Fetched Data", response);
             })
             .catch(error => {
-                console.error('게시물 불러오기 중 오류 발생:', error);
-                navigate('/error'); // 오류 발생 시 다른 페이지로 이동
-            });
+                console.error('Error fetching post details:', error);
+                navigate('/error'); // Redirect to an error page if fetching fails
+            }); 
     }, [id, navigate]);
 
     if (!post) {
-        return <div>.</div>;
+        return <div>Loading...</div>;
     }
 
     return (
@@ -53,7 +61,7 @@ export default function PostDetail() {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="body1">
-                            <strong>설치 기간:</strong> {post.installDate ? post.installDate : "사용자가 설정한 설치 기간이 없습니다."}
+                            <strong>설치 기간:</strong> {post.installDate ? post.installDate.join(' ~ ') : "사용자가 설정한 설치 기간이 없습니다."}
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -74,11 +82,16 @@ export default function PostDetail() {
                         <Typography variant="h6">첨부 파일</Typography>
                         <Divider />
                         <Box>
-                            {post.files && post.files.length > 0 ? (
-                                post.files.map((file, index) => (
-                                    <Box key={index} sx={{ mt: 1 }}>
+                            {post.fileUrls && post.fileUrls.length > 0 ? (
+                                post.fileUrls.map((file, index) => (
+
+                                    < Box key={index} sx={{ mt: 1 }}>
                                         <Typography variant="body2">
-                                            <strong>파일 {index + 1}:</strong> <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a>
+                                            <strong>파일 {index + 1}:</strong>{' '}
+                                            onclick = {downloadImage}
+                                            <a href={file.url} download target="_blank" rel="noopener noreferrer">
+                                                {file.url.split('/').pop()}
+                                            </a>
                                         </Typography>
                                     </Box>
                                 ))
@@ -89,6 +102,6 @@ export default function PostDetail() {
                     </Grid>
                 </Grid>
             </Paper>
-        </Container>
+        </Container >
     );
 }

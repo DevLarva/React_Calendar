@@ -108,3 +108,15 @@ export const getClientsDetail = async (id) => {
         throw error;
     }
 };
+
+
+// Client 게시물 상세보기 페이지
+export const getOutsourcingUsers = async () => {
+    try {
+        const response = await api.get(`/api/outsourcing`);
+        return response.data;
+    } catch (error) {
+        console.error("외주업체 유저 정보 불러오기 실패:", error);
+        throw error;
+    }
+};

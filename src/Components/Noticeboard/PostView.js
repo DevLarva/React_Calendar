@@ -7,7 +7,7 @@ import DatePicker from 'react-datepicker'; // Import for DatePicker
 import { ko } from 'date-fns/locale'; // Import for ko locale
 import { format } from 'date-fns'; // Import for ko locale
 import { useDropzone } from 'react-dropzone'; // Import for useDropzone
-import { savePost, getOutsourcingArticles } from '../../api'; // Named imports from api.js
+import { savePost, getOutsourcingUsers } from '../../api'; // Named imports from api.js
 
 export default function PostView({ onPostSaved }) {
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function PostView({ onPostSaved }) {
 
     useEffect(() => {
         // Fetch outsourcing options
-        getOutsourcingArticles()
+        getOutsourcingUsers()
             .then(response => {
                 setOutsourcingOptions(response);
             })
