@@ -40,9 +40,10 @@ export default function PostView({ onPostSaved }) {
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: 'image/*, application/pdf',
+        accept: 'image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/csv',
         maxSize: 3145728 // 3MB
     });
+
 
     const handleFileRemove = (fileToRemove) => {
         setSelectedFiles((prevFiles) => prevFiles.filter(file => file !== fileToRemove));
@@ -55,35 +56,39 @@ export default function PostView({ onPostSaved }) {
         }
         try {
             const formData = new FormData();
-            if (title) formData.append('title', title);
-            if (locate) formData.append('locate', locate);
-            if (content) formData.append('content', content);
-            if (companyName) formData.append('companyName', companyName);
-            if (boothWidth) formData.append('boothWidth', boothWidth);
-            if (boothHeight) formData.append('boothHeight', boothHeight);
-            if (designer) formData.append('designer', designer);
-            if (selectedOutsourcingId) formData.append('outsourcingId', selectedOutsourcingId);
+            formData.append('title', title || ''); // 값이 없을 경우 빈 문자열 추가
+            formData.append('locate', locate || '');
+            formData.append('content', content || '');
+            formData.append('companyName', companyName || '');
+            formData.append('boothWidth', boothWidth || '');
+            formData.append('boothHeight', boothHeight || '');
+            formData.append('designer', designer || '');
+            formData.append('outsourcingId', selectedOutsourcingId || []);
 
-            // InstallDate 배열의 각 날짜를 "yyyy-MM-dd" 형식으로 변환하여 FormData에 추가
             if (installDate[0] && installDate[1]) {
                 const formattedInstallDate = `${format(new Date(installDate[0]), 'yyyy-MM-dd')} ~ ${format(new Date(installDate[1]), 'yyyy-MM-dd')}`;
                 formData.append('installDate', formattedInstallDate);
+            } else {
+                formData.append('installDate', ['', '']);
             }
 
-            if (selectedFiles) selectedFiles.forEach(file => {
-                formData.append('files', file);
-            });
-
-            console.log('FormData 내용 확인:', formData.get('installDate'));
+            if (selectedFiles) {
+                selectedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+            } else {
+                formData.append('files', []);
+            }
 
             await savePost(formData); // API 호출
             onPostSaved(); // 콜백 호출
+            console.log('게시물이 성공적으로 저장되었습니다');
             navigate('/andn');
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
-
     };
+
 
 
 
