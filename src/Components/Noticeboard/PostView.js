@@ -55,14 +55,14 @@ export default function PostView({ onPostSaved }) {
         }
         try {
             const formData = new FormData();
-            formData.append('title', title);
-            formData.append('locate', locate);
-            formData.append('content', content);
-            formData.append('companyName', companyName);
-            formData.append('boothWidth', boothWidth);
-            formData.append('boothHeight', boothHeight);
-            formData.append('designer', designer);
-            formData.append('outsourcingId', selectedOutsourcingId);
+            if (title) formData.append('title', title);
+            if (locate) formData.append('locate', locate);
+            if (content) formData.append('content', content);
+            if (companyName) formData.append('companyName', companyName);
+            if (boothWidth) formData.append('boothWidth', boothWidth);
+            if (boothHeight) formData.append('boothHeight', boothHeight);
+            if (designer) formData.append('designer', designer);
+            if (selectedOutsourcingId) formData.append('outsourcingId', selectedOutsourcingId);
 
             // InstallDate 배열의 각 날짜를 "yyyy-MM-dd" 형식으로 변환하여 FormData에 추가
             if (installDate[0] && installDate[1]) {
@@ -70,7 +70,7 @@ export default function PostView({ onPostSaved }) {
                 formData.append('installDate', formattedInstallDate);
             }
 
-            selectedFiles.forEach(file => {
+            if (selectedFiles) selectedFiles.forEach(file => {
                 formData.append('files', file);
             });
 
@@ -108,7 +108,7 @@ export default function PostView({ onPostSaved }) {
                 글 작성
             </Typography>
             <FormGroup>
-                <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" />
+                {/* <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" /> */}
             </FormGroup>
             <Grid container spacing={3}>
                 <Grid item xs={12}>

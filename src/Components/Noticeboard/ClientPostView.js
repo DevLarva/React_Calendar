@@ -43,6 +43,11 @@ export default function ClientPostView({ onClientPostSaved }) {
     };
 
     const handleSubmit = async () => {
+
+        if (!eventName || !companyName) {
+            alert('필수 항목을 입력해주세요.');
+            return;
+        }
         try {
             const formData = new FormData();
             formData.append('eventName', eventName);
@@ -53,15 +58,16 @@ export default function ClientPostView({ onClientPostSaved }) {
             formData.append('boothLayout', boothLayout);
             formData.append('boothManager', boothManager);
             formData.append('boothCallNumber', boothCallNumber);
-            formData.append('installDate', installDate, installDate.toString());
-            formData.append('removeDate', removeDate, removeDate.toString());
+            if (installDate) formData.append('installDate', installDate);
+            // formData.append('installDate', installDate);
+            if (removeDate) formData.append('removeDate', removeDate);
             formData.append('applicant', applicant);
             formData.append('applicantNum', applicantNum);
-            formData.append('collectionDay', collectionDay, collectionDay.toString());
+            if (collectionDay) formData.append('collectionDay', collectionDay);
             formData.append('collectionLoc', collectionLoc);
             formData.append('memo', memo);
 
-            selectedFiles.forEach(file => {
+            if (selectedFiles) selectedFiles.forEach(file => {
                 formData.append('files', file);
             });
 
@@ -84,12 +90,12 @@ export default function ClientPostView({ onClientPostSaved }) {
         setBoothLayout('');
         setBoothManager('');
         setBoothCallNumber('');
-        setInstallDate(null);
-        setRemoveDate(null);
+        setInstallDate('');
+        setRemoveDate('');
         setSelectedFiles([]);
         setApplicant('');
         setApplicantNum('');
-        setCollectionDay(null);
+        setCollectionDay('');
         setCollectionLoc('');
         setMemo('');
         navigate('/client');
