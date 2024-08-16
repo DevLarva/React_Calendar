@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box, Divider, Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArticlesDetail } from '../../api'; // API call to fetch article details
+import { getArticlesDetail, downloadFile } from '../../api'; // API call to fetch article details
 
 export default function PostDetail() {
     const { id } = useParams(); // Get the post ID from the URL parameters
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
-    const downloadImage = async (filename) => {
-        const url = process.env.REACT_APP_API_URL + "/api/file/image/download?filename=" + filename;
-        const download = document.createElement('a');
 
-        download.href = url;
-        download.setAttribute('download', filename);
-        download.setAttribute('type', 'application/json');
-        download.click();
-    }
     useEffect(() => {
         // Fetch post details
         getArticlesDetail(id)
@@ -26,8 +18,16 @@ export default function PostDetail() {
             .catch(error => {
                 console.error('Error fetching post details:', error);
                 navigate('/error'); // Redirect to an error page if fetching fails
-            }); 
+            });
     }, [id, navigate]);
+
+    const handleDownload = async (fileUrl) => {
+        try {
+            await downloadFile(fileUrl);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    };
 
     if (!post) {
         return <div>Loading...</div>;
@@ -84,14 +84,21 @@ export default function PostDetail() {
                         <Box>
                             {post.fileUrls && post.fileUrls.length > 0 ? (
                                 post.fileUrls.map((file, index) => (
-
-                                    < Box key={index} sx={{ mt: 1 }}>
+                                    <Box key={index} sx={{ mt: 1 }}>
                                         <Typography variant="body2">
                                             <strong>파일 {index + 1}:</strong>{' '}
-                                            onclick = {downloadImage}
-                                            <a href={file.url} download target="_blank" rel="noopener noreferrer">
-                                                {file.url.split('/').pop()}
-                                            </a>
+                                            <button
+                                                onClick={() => handleDownload(file.url)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: 'black',
+                                                    textDecoration: 'underline',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                {decodeURIComponent(file.url.split('/').pop())} {/* 파일명을 디코딩하여 표시 */}
+                                            </button>
                                         </Typography>
                                     </Box>
                                 ))
@@ -99,6 +106,7 @@ export default function PostDetail() {
                                 <Typography variant="body2">첨부 파일이 없습니다.</Typography>
                             )}
                         </Box>
+
                     </Grid>
                 </Grid>
             </Paper>

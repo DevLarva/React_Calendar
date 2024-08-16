@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box, Divider, Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClientsDetail } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
+import { getClientsDetail, downloadFile } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
 
 export default function ClientPostDetail() {
     const { id } = useParams(); // URL 파라미터에서 게시물 ID를 가져옴
@@ -24,6 +24,13 @@ export default function ClientPostDetail() {
     if (!post) {
         return <div>.</div>;
     }
+    const handleDownload = async (fileUrl) => {
+        try {
+            await downloadFile(fileUrl);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    };
 
     return (
         <Container component="main" maxWidth="md">
@@ -79,15 +86,33 @@ export default function ClientPostDetail() {
                         <Divider />
                     </Grid>
                     <Grid item xs={12}>
-                        {post.files && post.files.length > 0 ? (
-                            post.files.map((file, index) => (
-                                <Box key={index} sx={{ mt: 1 }}>
-                                    <Typography variant="body2"><strong>파일 {index + 1}:</strong> <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a></Typography>
-                                </Box>
-                            ))
-                        ) : (
-                            <Typography variant="body2">첨부 파일이 없습니다.</Typography>
-                        )}
+                        <Typography variant="h6">첨부 파일</Typography>
+                        <Divider />
+                        <Box>
+                            {post.fileUrls && post.fileUrls.length > 0 ? (
+                                post.fileUrls.map((file, index) => (
+                                    <Box key={index} sx={{ mt: 1 }}>
+                                        <Typography variant="body2">
+                                            <strong>파일 {index + 1}:</strong>{' '}
+                                            <button
+                                                onClick={() => handleDownload(file.url)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: 'black',
+                                                    textDecoration: 'underline',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                {decodeURIComponent(file.url.split('/').pop())} {/* 파일명을 디코딩하여 표시 */}
+                                            </button>
+                                        </Typography>
+                                    </Box>
+                                ))
+                            ) : (
+                                <Typography variant="body2">첨부 파일이 없습니다.</Typography>
+                            )}
+                        </Box>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant="h6">물품 픽업</Typography>

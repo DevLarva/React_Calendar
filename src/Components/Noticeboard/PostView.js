@@ -63,13 +63,11 @@ export default function PostView({ onPostSaved }) {
             formData.append('boothWidth', boothWidth || '');
             formData.append('boothHeight', boothHeight || '');
             formData.append('designer', designer || '');
-            formData.append('outsourcingId', selectedOutsourcingId || []);
+            formData.append('outsourcingId', selectedOutsourcingId || '');
 
             if (installDate[0] && installDate[1]) {
                 const formattedInstallDate = `${format(new Date(installDate[0]), 'yyyy-MM-dd')} ~ ${format(new Date(installDate[1]), 'yyyy-MM-dd')}`;
                 formData.append('installDate', formattedInstallDate);
-            } else {
-                formData.append('installDate', ['', '']);
             }
 
             if (selectedFiles) {

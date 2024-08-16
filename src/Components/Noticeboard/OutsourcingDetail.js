@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box, Divider, Container } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOutsourcingDetail } from '../../api'; // API call to fetch article details
+import { getOutsourcingDetail, downloadFile } from '../../api'; // API call to fetch article details
 
 export default function OutsourcingDetail() {
     const { id } = useParams(); // Get the post ID from the URL parameters
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
-    const downloadImage = async (filename) => {
-        const url = process.env.REACT_APP_API_URL + "/api/file/image/download?filename=" + filename;
-        const download = document.createElement('a');
 
-        download.href = url;
-        download.setAttribute('download', filename);
-        download.setAttribute('type', 'application/json');
-        download.click();
-    }
+    const handleDownload = async (fileUrl) => {
+        try {
+            await downloadFile(fileUrl);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    };
+
     useEffect(() => {
         // Fetch post details
         getOutsourcingDetail(id)
@@ -25,7 +25,6 @@ export default function OutsourcingDetail() {
             })
             .catch(error => {
                 console.error('Error fetching post details:', error);
-                navigate('/error'); // Redirect to an error page if fetching fails
             });
     }, [id, navigate]);
 
@@ -75,23 +74,30 @@ export default function OutsourcingDetail() {
                         <Typography variant="h6">외주업체 정보</Typography>
                         <Divider />
                     </Grid>
-                    {/* <Grid item xs={12}>
+                    <Grid item xs={12}>
                         <Typography variant="body1"><strong>외주업체:</strong> {post.outsourcingName}</Typography>
-                    </Grid> */}
+                    </Grid>
                     <Grid item xs={12}>
                         <Typography variant="h6">첨부 파일</Typography>
                         <Divider />
                         <Box>
-                            {post.fileUrls && post.fileUrls.length > 0 ? (
-                                post.fileUrls.map((file, index) => (
-
-                                    < Box key={index} sx={{ mt: 1 }}>
+                            {post.fileUrl && post.fileUrl.length > 0 ? (
+                                post.fileUrl.map((file, index) => (
+                                    <Box key={index} sx={{ mt: 1 }}>
                                         <Typography variant="body2">
                                             <strong>파일 {index + 1}:</strong>{' '}
-                                            onclick = {downloadImage}
-                                            <a href={file.url} download target="_blank" rel="noopener noreferrer">
-                                                {file.url.split('/').pop()}
-                                            </a>
+                                            <button
+                                                onClick={() => handleDownload(file.url)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: 'black',
+                                                    textDecoration: 'underline',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                {decodeURIComponent(file.url.split('/').pop())} {/* 파일명을 디코딩하여 표시 */}
+                                            </button>
                                         </Typography>
                                     </Box>
                                 ))

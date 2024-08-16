@@ -138,10 +138,57 @@ export const getOutsourcingList = async () => {
 // 외주업체 게시물 상세보기 페이지
 export const getOutsourcingDetail = async (id) => {
     try {
-        const response = await api.get(`/api/outsourcing/articles/${id}`);
+        const response = await api.get(`/api/andn/articles/${id}`);
         return response.data;
     } catch (error) {
         console.error("외주업체 상세보기 불러오기 실패:", error);
         throw error;
+    }
+};
+
+
+// 다운로드 
+export const downloadFile = async (fileUrl) => {
+    try {
+        // 파일 URL을 URL 경로로 안전하게 인코딩
+        const encodedUrl = encodeURIComponent(fileUrl);
+        const apiUrl = `/download?url=${encodedUrl}`;
+        console.log("apiUrl:" + apiUrl);
+
+        const response = await api.get(apiUrl, {
+            responseType: 'blob',  // 서버에서 보내는 파일을 Blob 형식으로 받아옴
+            headers: {
+                'Accept': 'application/octet-stream',
+            }
+        });
+
+        if (response.status === 200) {
+            // Content-Disposition 헤더에서 파일명 추출
+            const disposition = response.headers['content-disposition'];
+            let fileName = decodeURIComponent(fileUrl.split('/').pop()); // 기본 파일명 설정
+
+            if (disposition) {
+                const fileNameMatch = disposition.match(/filename(?:\*=UTF-8'')?"(.+?)"/);
+                if (fileNameMatch && fileNameMatch[1]) {
+                    // 파일 이름 디코딩
+                    fileName = decodeURIComponent(fileNameMatch[1]);
+                }
+            }
+
+            // 파일 다운로드 처리 (예: Blob 사용)
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a); // 파이어폭스 호환성을 위해 추가
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url); // URL 해제
+        } else {
+            throw new Error(`Failed to download file. Status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error downloading file:', error);
     }
 };

@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import SearchBar from './SearchBar';
-import ClientPostList from './ClientPostList';
+import OutsourcingList from './OutsourcingList';
 import { getOutsourcingList } from '../../api';  // API 호출 관련 함수 import
-import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';  // 날짜 변환을 위한 라이브러리
 
 function OutsourcingMain() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchCriteria, setSearchCriteria] = useState('author');
     const [posts, setPosts] = useState([]);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -20,7 +18,7 @@ function OutsourcingMain() {
                 // createAt 값을 날짜 형식으로 변환
                 const formattedData = data.map(post => ({
                     ...post,
-                    // title: post.eventName || "제목 없음",  // title 필드가 비어 있을 경우 기본 값을 설정
+                    // title: post.title || "제목 없음",  // title 필드가 비어 있을 경우 기본 값을 설정
                     date: dayjs(post.createdAt).format('YYYY-MM-DD')
                 }));
 
@@ -50,7 +48,7 @@ function OutsourcingMain() {
                     />
                 </Box>
                 <Box my={4} sx={{ position: 'relative' }}>
-                    <ClientPostList posts={filteredPosts} />
+                    <OutsourcingList posts={filteredPosts} />
                 </Box>
             </Container>
         </>
