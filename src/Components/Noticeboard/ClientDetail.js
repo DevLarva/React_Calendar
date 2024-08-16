@@ -17,7 +17,6 @@ export default function ClientPostDetail() {
             })
             .catch(error => {
                 console.error('게시물 불러오기 중 오류 발생:', error);
-                navigate('/error'); // 오류 발생 시 다른 페이지로 이동
             });
     }, [id, navigate]);
 

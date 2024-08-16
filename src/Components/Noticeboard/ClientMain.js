@@ -17,7 +17,6 @@ function ClientMain() {
         const fetchPosts = async () => {
             try {
                 const data = await getClientArticles();
-
                 // createAt 값을 날짜 형식으로 변환
                 const formattedData = data.map(post => ({
                     ...post,

@@ -19,7 +19,6 @@ export default function PostDetail() {
             })
             .catch(error => {
                 console.error('Error fetching post details:', error);
-                navigate('/error'); // Redirect to an error page if fetching fails
             });
     }, [id, navigate]);
 
@@ -32,20 +31,24 @@ export default function PostDetail() {
     };
     const handleEdit = () => {
         // 편집 페이지로 이동
-        console.log('게시물이 성공적으로 삭제되었습니다');
+        console.log('게시물이 성공적으로 수정되었습니다');
+
     };
-    const handleDelete = async (id) => {
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm('이 글을 삭제하시겠습니까?');
+        if (!confirmDelete) {
+            return; // 사용자가 삭제를 취소한 경우 함수 종료
+        }
+
         try {
-            await delAndnPost(id)
+            await delAndnPost(id); // 삭제 API 호출
             console.log('게시물이 성공적으로 삭제되었습니다');
-            navigate('/andn');
+            navigate('/andn'); // 삭제가 성공적으로 완료된 후 페이지 이동
         } catch (error) {
             console.error('게시물 삭제 중 오류 발생:', error);
         }
-        if (window.confirm('이 글을 삭제하시겠습니까?')) {
-            navigate('/andn')
-        }
     };
+
 
     if (!post) {
         return <div>Loading...</div>;
