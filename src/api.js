@@ -192,3 +192,50 @@ export const downloadFile = async (fileUrl) => {
         console.error('Error downloading file:', error);
     }
 };
+
+
+// Andn 게시물 수정
+export const patchAndnPost = async (id) => {
+    try {
+        const response = await api.patch(`/api/andn/articles/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Andn 게시물 수정 에러:", error);
+        throw error;
+    }
+};
+
+// Andn 게시물 삭제
+export const delAndnPost = async (id) => {
+    try {
+        const response = await api.delete(`/api/andn/articles/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Andn 게시물 삭제 에러:", error);
+        throw error;
+    }
+};
+
+
+// Client 게시물 수정
+export const patchClientPost = async (id) => {
+    try {
+        const response = await api.patch(`/api/client/documents/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Client 게시물 수정 에러:", error);
+        throw error;
+    }
+};
+
+
+// Client 게시물 삭제
+export const delClientPost = async (id) => {
+    try {
+        const response = await api.delete(`/api/client/documents/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Client 게시물 삭제 에러:", error);
+        throw error;
+    }
+};
