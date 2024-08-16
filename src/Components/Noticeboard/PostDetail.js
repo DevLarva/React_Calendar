@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Typography, Grid, Box, Divider, Container } from '@mui/material';
+import { Paper, Typography, Grid, Box, Divider, Container, IconButton } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArticlesDetail, downloadFile } from '../../api'; // API call to fetch article details
+import { getArticlesDetail, downloadFile, delAndnPost } from '../../api'; // API call to fetch article details
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function PostDetail() {
     const { id } = useParams(); // Get the post ID from the URL parameters
@@ -28,6 +30,22 @@ export default function PostDetail() {
             console.error('Error downloading file:', error);
         }
     };
+    const handleEdit = () => {
+        // 편집 페이지로 이동
+        console.log('게시물이 성공적으로 삭제되었습니다');
+    };
+    const handleDelete = async (id) => {
+        try {
+            await delAndnPost(id)
+            console.log('게시물이 성공적으로 삭제되었습니다');
+            navigate('/andn');
+        } catch (error) {
+            console.error('게시물 삭제 중 오류 발생:', error);
+        }
+        if (window.confirm('이 글을 삭제하시겠습니까?')) {
+            navigate('/andn')
+        }
+    };
 
     if (!post) {
         return <div>Loading...</div>;
@@ -35,7 +53,15 @@ export default function PostDetail() {
 
     return (
         <Container component="main" maxWidth="md">
-            <Paper elevation={3} sx={{ padding: 3, marginTop: 3 }}>
+            <Paper elevation={3} sx={{ padding: 3, marginTop: 3, position: 'relative' }}>
+                <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+                    <IconButton aria-label="edit" onClick={handleEdit}>
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton aria-label="delete" onClick={handleDelete}>
+                        <DeleteIcon />
+                    </IconButton>
+                </Box>
                 <Typography variant="h5" align="center" gutterBottom>
                     행사 상세보기
                 </Typography>
@@ -109,7 +135,7 @@ export default function PostDetail() {
 
                     </Grid>
                 </Grid>
-            </Paper>
+            </Paper >
         </Container >
     );
 }
