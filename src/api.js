@@ -1,6 +1,6 @@
 import axios from 'axios';
+import jwtDecode from 'jwt-decode'; // jwt-decode 라이브러리 임포트
 import { getToken } from './auth'; // 토큰을 가져오는 함수
-
 // 기본 URL 설정 및 요청 인터셉터 설정
 const api = axios.create({
     baseURL: 'http://andn-btest-env.eba-zwp5cit2.ap-northeast-2.elasticbeanstalk.com',
@@ -23,6 +23,7 @@ api.interceptors.request.use(config => {
     return Promise.reject(error);
 });
 
+
 // 모든 게시물 목록 가져오기
 export const getArticles = async () => {
     try {
@@ -31,7 +32,7 @@ export const getArticles = async () => {
     } catch (error) {
         console.error("게시물 가져오기 실패:", error);
         throw error;
-    }
+    }     
 };
 
 // 게시물 목록 가져오기

@@ -1,26 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box, Divider, Container, IconButton } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getArticlesDetail, downloadFile, delAndnPost } from '../../api'; // API call to fetch article details
+import { getArticlesDetail, downloadFile, delAndnPost } from '../../api';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
+import { getToken } from '../../auth'; // 토큰 가져오는 함수
 
 export default function PostDetail() {
-    const { id } = useParams(); // Get the post ID from the URL parameters
+    const { id } = useParams(); // URL 매개변수에서 게시물 ID 가져오기
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
-
+    const [isOwner, setIsOwner] = useState(false);
+    // 사용자가 작성자인지 여부를 확인하는 상태
     useEffect(() => {
-        // Fetch post details
+        // 게시물 세부 정보 가져오기
         getArticlesDetail(id)
             .then(response => {
                 setPost(response);
                 console.log("Fetched Data", response);
+                // 토큰에서 사용자 ID 추출
+                const token = getToken();
+                if (token) {
+                    const decodedToken = jwtDecode(token);
+                    const currentUserId = decodedToken.sub; // 토큰에서 사용자 ID 추출// 게시물의 작성자 ID와 현재 사용자의 ID 비교
+                    console.log("토큰", typeof currentUserId);
+                    console.log("아이디", typeof response.authorId);
+
+                    if (toString(response.authorId) === toString(currentUserId)) {
+                        setIsOwner(true);
+                    } else {
+                        setIsOwner(false);
+                    }
+                }
             })
             .catch(error => {
                 console.error('Error fetching post details:', error);
             });
     }, [id, navigate]);
+
+
 
     const handleDownload = async (fileUrl) => {
         try {
@@ -29,11 +48,11 @@ export default function PostDetail() {
             console.error('Error downloading file:', error);
         }
     };
-    const handleEdit = () => {
-        // 편집 페이지로 이동
-        console.log('게시물이 성공적으로 수정되었습니다');
 
+    const handleEdit = () => {
+        // 편집 페이지로 이동console.log('게시물이 성공적으로 수정되었습니다');
     };
+
     const handleDelete = async () => {
         const confirmDelete = window.confirm('이 글을 삭제하시겠습니까?');
         if (!confirmDelete) {
@@ -41,14 +60,12 @@ export default function PostDetail() {
         }
 
         try {
-            await delAndnPost(id); // 삭제 API 호출
-            console.log('게시물이 성공적으로 삭제되었습니다');
+            await delAndnPost(id); // 삭제 API 호출console.log('게시물이 성공적으로 삭제되었습니다');
             navigate('/andn'); // 삭제가 성공적으로 완료된 후 페이지 이동
         } catch (error) {
             console.error('게시물 삭제 중 오류 발생:', error);
         }
     };
-
 
     if (!post) {
         return <div>Loading...</div>;
@@ -57,14 +74,18 @@ export default function PostDetail() {
     return (
         <Container component="main" maxWidth="md">
             <Paper elevation={3} sx={{ padding: 3, marginTop: 3, position: 'relative' }}>
-                <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-                    <IconButton aria-label="edit" onClick={handleEdit}>
-                        <EditIcon />
-                    </IconButton>
-                    <IconButton aria-label="delete" onClick={handleDelete}>
-                        <DeleteIcon />
-                    </IconButton>
-                </Box>
+                {/* 이 부분에서 사용자가 작성자일 때만 수정/삭제 버튼을 렌더링 */}
+
+                {isOwner && (
+                    <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+                        <IconButton aria-label="edit" onClick={handleEdit}>
+                            <EditIcon />
+                        </IconButton>
+                        <IconButton aria-label="delete" onClick={handleDelete}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </Box>
+                )}
                 <Typography variant="h5" align="center" gutterBottom>
                     행사 상세보기
                 </Typography>
