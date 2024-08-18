@@ -21,7 +21,6 @@ export default function PostEditView() {
         if (location.state?.postData) {
             setPostData(location.state.postData);
             setInitialFiles(location.state.postData.fileUrls || []); // 파일 URL을 초기화
-            console.log('Initial files:', location.state.postData.fileUrls || []);
         }
     }, [location.state]);
 
@@ -50,6 +49,7 @@ export default function PostEditView() {
 
     const handleFileRemove = (fileToRemove) => {
         setSelectedFiles((prevFiles) => prevFiles.filter(file => file.file !== fileToRemove.file));
+        setInitialFiles((prevFiles) => prevFiles.filter(file => file.fileUrl !== fileToRemove.fileUrl));
     };
 
     const handleSubmit = async () => {
@@ -78,7 +78,7 @@ export default function PostEditView() {
 
             // 수정 전 파일과 새로 첨부된 파일 모두 formData에 추가
             [...initialFiles, ...selectedFiles].forEach(file => {
-                formData.append('files', file.file); // file.file로 수정
+                formData.append('files', file.file);
             });
 
             await patchAndnPost(postData.id, formData); // API 호출
@@ -197,18 +197,24 @@ export default function PostEditView() {
                     {initialFiles.length > 0 && (
                         <Box mt={2}>
                             <Typography variant="h6">수정 전 첨부 파일</Typography>
-                            {initialFiles.map((file, index) => (
-                                <Box key={`initial-${index}`} display="flex" alignItems="center" justifyContent="space-between">
-                                    <Typography variant="body2">
-                                        {file.url} {/* 수정 전 파일 URL 출력 */}
-                                    </Typography>
-                                    <IconButton onClick={() => handleFileRemove(file)}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </Box>
-                            ))}
+                            {initialFiles.map((file, index) => {
+                                // URL에서 파일 이름 추출
+                                const fileName = file.url.split('/').pop();
+                                return (
+                                    <Box key={`initial-${index}`} display="flex" alignItems="center" justifyContent="space-between">
+                                        <Typography variant="body2">
+                                            {fileName}
+                                        </Typography>
+                                        <IconButton onClick={() => handleFileRemove(file)}>
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Box>
+                                );
+                            })}
                         </Box>
                     )}
+
+
                     {selectedFiles.length > 0 && (
                         <Box mt={2}>
                             <Typography variant="h6">새로 첨부된 파일</Typography>
