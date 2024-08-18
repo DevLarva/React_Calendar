@@ -1,28 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Typography, Grid, Box, Divider, Container } from '@mui/material';
+import { Paper, Typography, Grid, Box, Divider, Container, IconButton } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClientsDetail, downloadFile } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
+import { getClientsDetail, downloadFile, delClientPost } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
+import { getToken } from '../../auth'; // 토큰 가져오는 함수
+
 
 export default function ClientPostDetail() {
     const { id } = useParams(); // URL 파라미터에서 게시물 ID를 가져옴
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
+    const [isOwner, setIsOwner] = useState(false);
 
+
+    // 사용자가 작성자인지 여부를 확인하는 상태
     useEffect(() => {
-        // 게시물 상세정보 가져오기
+        // 게시물 세부 정보 가져오기
         getClientsDetail(id)
             .then(response => {
                 setPost(response);
-                console.log("데이터", response)
+                console.log("Fetched Data", response);
+                // 토큰에서 사용자 ID 추출
+                const token = getToken();
+                if (token) {
+                    const decodedToken = jwtDecode(token);
+                    const currentUserId = decodedToken.sub; // 토큰에서 사용자 ID 추출// 게시물의 작성자 ID와 현재 사용자의 ID 비교
+                    console.log("토큰", typeof currentUserId);
+                    console.log("아이디", typeof response.authorId);
+
+                    if (toString(response.authorId) === toString(currentUserId)) {
+                        setIsOwner(true);
+                    } else {
+                        setIsOwner(false);
+                    }
+                }
             })
             .catch(error => {
-                console.error('게시물 불러오기 중 오류 발생:', error);
+                console.error('Error fetching post details:', error);
             });
     }, [id, navigate]);
 
     if (!post) {
         return <div>.</div>;
     }
+
     const handleDownload = async (fileUrl) => {
         try {
             await downloadFile(fileUrl);
@@ -31,16 +54,49 @@ export default function ClientPostDetail() {
         }
     };
 
+    const handleEdit = () => {
+        // 편집 페이지로 이동console.log('게시물이 성공적으로 수정되었습니다');
+    };
+
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm('이 글을 삭제하시겠습니까?');
+        if (!confirmDelete) {
+            return; // 사용자가 삭제를 취소한 경우 함수 종료
+        }
+
+        try {
+            await delClientPost(id); // 삭제 API 호출console.log('게시물이 성공적으로 삭제되었습니다');
+            navigate('/client'); // 삭제가 성공적으로 완료된 후 페이지 이동
+        } catch (error) {
+            console.error('게시물 삭제 중 오류 발생:', error);
+        }
+    };
+
     return (
         <Container component="main" maxWidth="md">
             <Paper elevation={3} sx={{ padding: 3, marginTop: 3 }}>
-                <Typography variant="h5" align="center" gutterBottom>
-                    WORK SHEET - 상세보기
-                </Typography>
-                <Grid container spacing={3}>
+                <Grid container justifyContent="space-between" alignItems="center">
+                    <Grid item>
+                        <Typography variant="h5" gutterBottom>
+                            WORK SHEET - 상세보기
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Box>
+                            <IconButton aria-label="edit" onClick={handleEdit}>
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton aria-label="delete" onClick={handleDelete}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Box>
+                    </Grid>
+                </Grid>
+
+                <Grid container spacing={4}>
+                    {/* 나머지 내용은 그대로 유지 */}
                     <Grid item xs={12}>
-                        <Typography variant="h6">Client</Typography>
-                        <Divider />
+                        <Divider sx={{ mt: 3 }} />
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="body1"><strong>행사명:</strong> {post.eventName}</Typography>
@@ -103,7 +159,7 @@ export default function ClientPostDetail() {
                                                     cursor: 'pointer'
                                                 }}
                                             >
-                                                {decodeURIComponent(file.url.split('/').pop())} {/* 파일명을 디코딩하여 표시 */}
+                                                {decodeURIComponent(file.url.split('/').pop())}
                                             </button>
                                         </Typography>
                                     </Box>
