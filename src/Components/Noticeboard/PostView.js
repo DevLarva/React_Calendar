@@ -40,7 +40,7 @@ export default function PostView({ onPostSaved }) {
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: 'image/*, application/*',
+        accept: 'image/*, application/pdf',
         maxSize: 3145728 // 3MB
     });
 

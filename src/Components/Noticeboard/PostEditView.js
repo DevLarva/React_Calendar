@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Paper, Typography, Grid, TextField, Button, Box, Checkbox, FormGroup, FormControlLabel, IconButton } from '@mui/material';
+import { Paper, Typography, Grid, TextField, Button, Box, IconButton } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from 'date-fns';
@@ -9,21 +9,23 @@ import { ko } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
 import { patchAndnPost, getOutsourcingUsers } from '../../api';
 
-export default function PostEditView({ onPostSaved }) {
+export default function PostEditView() {
     const navigate = useNavigate();
     const location = useLocation();
     const [postData, setPostData] = useState(location.state?.postData || {});
-    const [selectedFiles, setSelectedFiles] = useState(location.state?.postData.files || {});
+    const [selectedFiles, setSelectedFiles] = useState([]); // 새로 첨부된 파일 상태
+    const [initialFiles, setInitialFiles] = useState([]); // 수정 전 파일 상태
     const [outsourcingOptions, setOutsourcingOptions] = useState([]);
 
     useEffect(() => {
         if (location.state?.postData) {
             setPostData(location.state.postData);
+            setInitialFiles(location.state.postData.fileUrls || []); // 파일 URL을 초기화
+            console.log('Initial files:', location.state.postData.fileUrls || []);
         }
     }, [location.state]);
 
     useEffect(() => {
-        // Fetch outsourcing options
         getOutsourcingUsers()
             .then(response => {
                 setOutsourcingOptions(response);
@@ -32,26 +34,22 @@ export default function PostEditView({ onPostSaved }) {
                 console.error('Error fetching outsourcing options:', error);
             });
     }, []);
+
     const onDrop = useCallback((acceptedFiles) => {
         setSelectedFiles((prevFiles) => {
-            const newFiles = [...prevFiles, ...acceptedFiles];
-            setPostData((prevData) => ({ ...prevData, files: newFiles }));
-            return newFiles;
+            const newFiles = acceptedFiles.map(file => ({ file, name: file.name }));
+            return [...prevFiles, ...newFiles];
         });
     }, []);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: 'image/*, application/pdf',
+        accept: 'image/*, application/*',
         maxSize: 3145728 // 3MB
     });
 
     const handleFileRemove = (fileToRemove) => {
-        setSelectedFiles((prevFiles) => {
-            const updatedFiles = prevFiles.filter(file => file !== fileToRemove);
-            setPostData((prevData) => ({ ...prevData, files: updatedFiles }));
-            return updatedFiles;
-        });
+        setSelectedFiles((prevFiles) => prevFiles.filter(file => file.file !== fileToRemove.file));
     };
 
     const handleSubmit = async () => {
@@ -75,35 +73,30 @@ export default function PostEditView({ onPostSaved }) {
                     format(new Date(postData.installDate[0]), 'yyyy-MM-dd'),
                     format(new Date(postData.installDate[1]), 'yyyy-MM-dd')
                 ];
-
                 formData.append('installDate', formattedInstallDates);
             }
 
-            //   selectedFiles.forEach(file => {
-            //     formData.append('files', file);
-            // });
+            // 수정 전 파일과 새로 첨부된 파일 모두 formData에 추가
+            [...initialFiles, ...selectedFiles].forEach(file => {
+                formData.append('files', file.file); // file.file로 수정
+            });
+
             await patchAndnPost(postData.id, formData); // API 호출
-            // onPostSaved(); // 콜백 호출
             navigate(`/andn/posts/${postData.id}`);
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
-
     };
 
     const handleCancel = () => {
         navigate(`/andn/posts/${postData.id}`);
     };
 
-
     return (
         <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h5" gutterBottom>
                 글 작성
             </Typography>
-            <FormGroup>
-                <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" />
-            </FormGroup>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <TextField
@@ -122,7 +115,7 @@ export default function PostEditView({ onPostSaved }) {
                         variant="outlined"
                         fullWidth
                         value={postData.locate}
-                        onChange={(e) => setPostData({ ...postData, title: e.target.value })}
+                        onChange={(e) => setPostData({ ...postData, locate: e.target.value })}
                         required
                         autoComplete="off"
                     />
@@ -201,12 +194,28 @@ export default function PostEditView({ onPostSaved }) {
                             파일당 최대 3MB
                         </Typography>
                     </Box>
+                    {initialFiles.length > 0 && (
+                        <Box mt={2}>
+                            <Typography variant="h6">수정 전 첨부 파일</Typography>
+                            {initialFiles.map((file, index) => (
+                                <Box key={`initial-${index}`} display="flex" alignItems="center" justifyContent="space-between">
+                                    <Typography variant="body2">
+                                        {file.url} {/* 수정 전 파일 URL 출력 */}
+                                    </Typography>
+                                    <IconButton onClick={() => handleFileRemove(file)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Box>
+                            ))}
+                        </Box>
+                    )}
                     {selectedFiles.length > 0 && (
                         <Box mt={2}>
+                            <Typography variant="h6">새로 첨부된 파일</Typography>
                             {selectedFiles.map((file, index) => (
-                                <Box key={index} display="flex" alignItems="center" justifyContent="space-between">
+                                <Box key={`selected-${index}`} display="flex" alignItems="center" justifyContent="space-between">
                                     <Typography variant="body2">
-                                        {file.name}
+                                        {file.name} {/* 새로 첨부된 파일 이름 출력 */}
                                     </Typography>
                                     <IconButton onClick={() => handleFileRemove(file)}>
                                         <DeleteIcon />
