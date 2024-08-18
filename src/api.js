@@ -32,7 +32,7 @@ export const getArticles = async () => {
     } catch (error) {
         console.error("게시물 가져오기 실패:", error);
         throw error;
-    }     
+    }
 };
 
 // 게시물 목록 가져오기
@@ -195,13 +195,18 @@ export const downloadFile = async (fileUrl) => {
 };
 
 
-// Andn 게시물 수정
-export const patchAndnPost = async (id) => {
+// andn 게시물 수정 함수
+export const patchAndnPost = async (id, updatedPostData) => {
     try {
-        const response = await api.patch(`/api/andn/articles/${id}`);
+        const response = await api.patch(`/api/andn/articles/${id}`, updatedPostData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        console.log("patchAndnPost 불러짐")
         return response.data;
     } catch (error) {
-        console.error("Andn 게시물 수정 에러:", error);
+        console.error('게시물 수정 중 오류 발생:', error);
         throw error;
     }
 };
@@ -240,3 +245,5 @@ export const delClientPost = async (id) => {
         throw error;
     }
 };
+
+

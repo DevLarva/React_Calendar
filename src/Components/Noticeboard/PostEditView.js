@@ -1,27 +1,26 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Paper, Typography, Grid, TextField, Button, Box, Checkbox, FormGroup, FormControlLabel, IconButton } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
-import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
-import { savePost, getOutsourcingUsers } from '../../api';
+import { patchAndnPost, getOutsourcingUsers } from '../../api';
 
-export default function PostView({ onPostSaved }) {
+export default function PostEditView({ onPostSaved }) {
     const navigate = useNavigate();
-    const [title, setTitle] = useState('');
-    const [locate, setLocate] = useState('');
-    const [content, setContent] = useState('');
-    const [companyName, setCompanyName] = useState('');
-    const [boothWidth, setBoothWidth] = useState('');
-    const [boothHeight, setBoothHeight] = useState('');
-    const [installDate, setInstallDate] = useState(['', '']);
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [designer, setDesigner] = useState('');
+    const location = useLocation();
+    const [postData, setPostData] = useState(location.state?.postData || {});
+    const [selectedFiles, setSelectedFiles] = useState(location.state?.postData.files || {});
     const [outsourcingOptions, setOutsourcingOptions] = useState([]);
-    const [selectedOutsourcingId, setSelectedOutsourcingId] = useState('');
+
+    useEffect(() => {
+        if (location.state?.postData) {
+            setPostData(location.state.postData);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         // Fetch outsourcing options
@@ -33,78 +32,67 @@ export default function PostView({ onPostSaved }) {
                 console.error('Error fetching outsourcing options:', error);
             });
     }, []);
-
     const onDrop = useCallback((acceptedFiles) => {
-        setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+        setSelectedFiles((prevFiles) => {
+            const newFiles = [...prevFiles, ...acceptedFiles];
+            setPostData((prevData) => ({ ...prevData, files: newFiles }));
+            return newFiles;
+        });
     }, []);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: 'image/*, application/*',
+        accept: 'image/*, application/pdf',
         maxSize: 3145728 // 3MB
     });
 
     const handleFileRemove = (fileToRemove) => {
-        setSelectedFiles((prevFiles) => prevFiles.filter(file => file !== fileToRemove));
+        setSelectedFiles((prevFiles) => {
+            const updatedFiles = prevFiles.filter(file => file !== fileToRemove);
+            setPostData((prevData) => ({ ...prevData, files: updatedFiles }));
+            return updatedFiles;
+        });
     };
 
     const handleSubmit = async () => {
-        if (!title) {
+        if (!postData.title) {
             alert('행사명을 입력해주세요.');
             return;
         }
         try {
             const formData = new FormData();
-            formData.append('title', title);
-            formData.append('locate', locate);
-            formData.append('content', content);
-            formData.append('companyName', companyName);
-            formData.append('boothWidth', boothWidth);
-            formData.append('boothHeight', boothHeight);
-            formData.append('designer', designer);
-            formData.append('outsourcingId', selectedOutsourcingId);
+            formData.append('title', postData.title);
+            formData.append('locate', postData.locate);
+            formData.append('companyName', postData.companyName);
+            formData.append('designer', postData.designer);
+            formData.append('boothWidth', postData.boothWidth);
+            formData.append('boothHeight', postData.boothHeight);
+            formData.append('content', postData.content);
+            formData.append('outsourcingId', postData.outsourcingId);
 
-            console.log(formData)
-
-            // InstallDate 배열의 각 날짜를 "yyyy-MM-dd" 형식으로 변환하여 FormData에 추가
-            if (installDate[0] && installDate[1]) {
+            if (postData.installDate[0] && postData.installDate[1]) {
                 const formattedInstallDates = [
-                    format(new Date(installDate[0]), 'yyyy-MM-dd'),
-                    format(new Date(installDate[1]), 'yyyy-MM-dd')
+                    format(new Date(postData.installDate[0]), 'yyyy-MM-dd'),
+                    format(new Date(postData.installDate[1]), 'yyyy-MM-dd')
                 ];
 
                 formData.append('installDate', formattedInstallDates);
             }
 
-            selectedFiles.forEach(file => {
-                formData.append('files', file);
-            });
-
-            console.log('FormData 내용 확인:', formData.get('installDate'));
-
-            await savePost(formData); // API 호출
-            onPostSaved(); // 콜백 호출
-            navigate('/andn');
+            //   selectedFiles.forEach(file => {
+            //     formData.append('files', file);
+            // });
+            await patchAndnPost(postData.id, formData); // API 호출
+            // onPostSaved(); // 콜백 호출
+            navigate(`/andn/posts/${postData.id}`);
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
 
     };
 
-
-
     const handleCancel = () => {
-        setTitle('');
-        setLocate('');
-        setContent('');
-        setCompanyName('');
-        setBoothWidth('');
-        setBoothHeight('');
-        setInstallDate(['', '']);
-        setSelectedFiles([]);
-        setDesigner('');
-        setSelectedOutsourcingId('');
-        navigate('/andn');
+        navigate(`/andn/posts/${postData.id}`);
     };
 
 
@@ -114,7 +102,7 @@ export default function PostView({ onPostSaved }) {
                 글 작성
             </Typography>
             <FormGroup>
-                {/* <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" /> */}
+                <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" />
             </FormGroup>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -122,8 +110,8 @@ export default function PostView({ onPostSaved }) {
                         label="행사명"
                         variant="outlined"
                         fullWidth
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        value={postData.title}
+                        onChange={(e) => setPostData({ ...postData, title: e.target.value })}
                         required
                         autoComplete="off"
                     />
@@ -133,8 +121,8 @@ export default function PostView({ onPostSaved }) {
                         label="행사 장소"
                         variant="outlined"
                         fullWidth
-                        value={locate}
-                        onChange={(e) => setLocate(e.target.value)}
+                        value={postData.locate}
+                        onChange={(e) => setPostData({ ...postData, title: e.target.value })}
                         required
                         autoComplete="off"
                     />
@@ -144,8 +132,8 @@ export default function PostView({ onPostSaved }) {
                         label="업체명"
                         variant="outlined"
                         fullWidth
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
+                        value={postData.companyName}
+                        onChange={(e) => setPostData({ ...postData, companyName: e.target.value })}
                         required
                         autoComplete="off"
                     />
@@ -155,8 +143,8 @@ export default function PostView({ onPostSaved }) {
                         label="담당 디자이너"
                         variant="outlined"
                         fullWidth
-                        value={designer}
-                        onChange={(e) => setDesigner(e.target.value)}
+                        value={postData.designer}
+                        onChange={(e) => setPostData({ ...postData, designer: e.target.value })}
                         required
                         autoComplete="off"
                     />
@@ -168,8 +156,8 @@ export default function PostView({ onPostSaved }) {
                     <Box display="flex" alignItems="center">
                         <TextField
                             variant="outlined"
-                            value={boothWidth}
-                            onChange={(e) => setBoothWidth(e.target.value.replace(/[^0-9]/g, ''))}
+                            value={postData.boothWidth}
+                            onChange={(e) => setPostData({ ...postData, boothWidth: e.target.value })}
                             required
                             sx={{ flex: 1 }}
                             autoComplete="off"
@@ -178,8 +166,8 @@ export default function PostView({ onPostSaved }) {
                         <Typography sx={{ mx: 3 }}>X</Typography>
                         <TextField
                             variant="outlined"
-                            value={boothHeight}
-                            onChange={(e) => setBoothHeight(e.target.value.replace(/[^0-9]/g, ''))}
+                            value={postData.boothHeight}
+                            onChange={(e) => setPostData({ ...postData, boothHeight: e.target.value.replace(/[^0-9]/g, '') })}
                             required
                             sx={{ flex: 1 }}
                             autoComplete="off"
@@ -191,9 +179,12 @@ export default function PostView({ onPostSaved }) {
                     <DatePicker
                         locale={ko}
                         selectsRange
-                        startDate={installDate[0]}
-                        endDate={installDate[1]}
-                        onChange={(update) => setInstallDate(update)}
+                        startDate={postData.installDate[0]}
+                        endDate={postData.installDate[1]}
+                        onChange={(dates) => {
+                            const [start, end] = dates;
+                            setPostData({ ...postData, installDate: [start, end] });
+                        }}
                         dateFormat="yyyy/MM/dd"
                         customInput={<TextField fullWidth label="설치 기간" variant="outlined" />}
                         autoComplete="off"
@@ -232,8 +223,8 @@ export default function PostView({ onPostSaved }) {
                         fullWidth
                         multiline
                         rows={4}
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
+                        value={postData.content}
+                        onChange={(e) => setPostData({ ...postData, content: e.target.value })}
                         required
                         autoComplete="off"
                     />
@@ -243,8 +234,8 @@ export default function PostView({ onPostSaved }) {
                         select
                         variant="outlined"
                         fullWidth
-                        value={selectedOutsourcingId}
-                        onChange={(e) => setSelectedOutsourcingId(e.target.value)}
+                        value={postData.outsourcingId}
+                        onChange={(e) => setPostData({ ...postData, outsourcingId: e.target.value })}
                         SelectProps={{
                             native: true,
                         }}
@@ -266,7 +257,7 @@ export default function PostView({ onPostSaved }) {
                         fullWidth
                         onClick={handleSubmit}
                     >
-                        제출
+                        수정 완료
                     </Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -283,18 +274,3 @@ export default function PostView({ onPostSaved }) {
         </Paper>
     );
 }
-
-
-
-
-/*
-필수 내용
-행사명 , 행사 장소
-업체명, 부스사이즈
-설치기간, 행사기간, 철수기간
-담당디자이너
-
-행사 기간, 설치기간 철수 기간 모두 기간제로(~) 로 표현 달력 2개씩
-TODO: 첨부파일 선택된것들 삭제하기 위한 버튼 추가필요, 부스 크기 숫자만 입력 받게끔. 기간 입력 받을때 텍스트 필드처럼 작동 안하게(자동완성)
-시간 라이브러리 추가하기
-*/

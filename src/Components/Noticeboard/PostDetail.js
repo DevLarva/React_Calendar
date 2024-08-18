@@ -48,9 +48,9 @@ export default function PostDetail() {
             console.error('Error downloading file:', error);
         }
     };
-
     const handleEdit = () => {
-        // 편집 페이지로 이동console.log('게시물이 성공적으로 수정되었습니다');
+        // 현재 게시물 데이터를 수정 페이지로 전달
+        navigate(`/andn/posts/edit`, { state: { postData: post } });
     };
 
     const handleDelete = async () => {

@@ -65,7 +65,8 @@ export default function ClientPostDetail() {
         }
 
         try {
-            await delClientPost(id); // 삭제 API 호출console.log('게시물이 성공적으로 삭제되었습니다');
+            await delClientPost(id); // 삭제 API 호출
+            console.log('게시물이 성공적으로 삭제되었습니다');
             navigate('/client'); // 삭제가 성공적으로 완료된 후 페이지 이동
         } catch (error) {
             console.error('게시물 삭제 중 오류 발생:', error);

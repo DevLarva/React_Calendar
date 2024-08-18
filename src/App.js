@@ -22,6 +22,7 @@ import PostList from './Components/Noticeboard/PostList';
 import ClientMain from './Components/Noticeboard/ClientMain';
 import PostDetail from './Components/Noticeboard/PostDetail';
 import ClientPostDetail from './Components/Noticeboard/ClientDetail';
+import PostEditView from './Components/Noticeboard/PostEditView';
 
 function CalendarApp() {
   const [currentMonth, setCurrentMonth] = React.useState(getMonth());
@@ -71,6 +72,7 @@ function AppContent() {
         <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
         <Route path="/client/posts/:id" element={<PrivateRoute><ClientPostDetail /></PrivateRoute>} />
         <Route path="/outsourcing/articles/:id" element={<PrivateRoute><OutsourcingDetail /></PrivateRoute>} />
+        <Route path="/andn/posts/edit" element={<PrivateRoute><PostEditView /></PrivateRoute>} />
       </Routes>
     </>
   );
