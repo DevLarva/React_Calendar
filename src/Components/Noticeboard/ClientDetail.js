@@ -82,19 +82,20 @@ export default function ClientPostDetail() {
                         </Typography>
                     </Grid>
                     <Grid item>
-                        <Box>
-                            <IconButton aria-label="edit" onClick={handleEdit}>
-                                <EditIcon />
-                            </IconButton>
-                            <IconButton aria-label="delete" onClick={handleDelete}>
-                                <DeleteIcon />
-                            </IconButton>
-                        </Box>
+                        {isOwner && (
+                            <Box>
+                                <IconButton aria-label="edit" onClick={handleEdit}>
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton aria-label="delete" onClick={handleDelete}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Box>
+                        )}
                     </Grid>
                 </Grid>
 
                 <Grid container spacing={4}>
-                    {/* 나머지 내용은 그대로 유지 */}
                     <Grid item xs={12}>
                         <Divider sx={{ mt: 3 }} />
                     </Grid>
