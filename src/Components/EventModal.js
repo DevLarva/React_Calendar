@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect } from 'react';
 import GlobalContext from '../context/GlobalContext';
 import dayjs from 'dayjs';
 import { call } from './ApiService';
+import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
+import { getToken } from '../../src/auth'; // 토큰 가져오는 함수
 
 const labelsClasses = [   //색상 추가(6/1)
   "red",
@@ -24,6 +26,7 @@ export default function EventModal() {
     selectedEvent
   } = useContext(GlobalContext);
 
+  const [isOwner, setIsOwner] = useState(false);
   const [title, setTitle] = useState(
     selectedEvent ? selectedEvent.title : ""
   );
@@ -40,11 +43,41 @@ export default function EventModal() {
     selectedEvent ? dayjs(selectedEvent.endDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
   );
 
+  useEffect(() => {
+    const fetchUserId = () => {
+      const token = getToken();
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        console.log("디코드된 토큰:", decodedToken);
+        const currentUserId = decodedToken.sub; // 토큰에서 사용자 ID 추출
+
+        // `selectedEvent`가 존재하는지 확인
+        if (selectedEvent && String(selectedEvent.author) === String(currentUserId)) {
+          console.log("selectedEvent", selectedEvent);
+          console.log("토큰", currentUserId);
+          console.log("아이디", typeof selectedEvent.author);
+          setIsOwner(true);
+        } else {
+          console.log("selectedEvent", selectedEvent);
+          console.log("토큰", typeof currentUserId, currentUserId);
+          console.log("아이디", selectedEvent ? selectedEvent.author : "undefined");
+          setIsOwner(false);
+        }
+      }
+    };
+
+    fetchUserId();
+  }, [selectedEvent]); // `selectedEvent`가 변경될 때마다 이 useEffect가 실행됩니다.
+
+
+
+
   const add = (item) => {
     call("/api/andnCalendar/todo", "POST", item)
       .then(response => {
         dispatchCalEvent({ type: "push", payload: response });
       })
+
       .catch(error => console.error("There was an error adding the item!", error));
   };
 
@@ -59,9 +92,7 @@ export default function EventModal() {
   const deleteItem = (item) => {
     call(`/api/andnCalendar/todo/${item.id}`, "DELETE")
       .then(() => {
-        // 서버에서 삭제가 성공하면, 클라이언트 상태도 업데이트
         dispatchCalEvent({ type: "delete", payload: item });
-        setShowEventModal(false);
       })
       .catch(error => console.error("There was an error deleting the item!", error));
   };
@@ -86,6 +117,12 @@ export default function EventModal() {
     setShowEventModal(false);
   }
 
+
+
+  useEffect(() => {
+    console.log("isOwner 상태 값:", isOwner);
+  }, [isOwner]);
+
   return (
     <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center"> {/* 화면 전체를 덮는 모달 */}
       <form className="bg-white rounded-lg shadow-2xl w-1/4"> {/* 모달의 스타일링 */}
@@ -94,12 +131,11 @@ export default function EventModal() {
             drag_handle
           </span>
           <div>
-            {selectedEvent && (
+            {selectedEvent && isOwner && (
               <span
                 onClick={() => {
-                  dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
+                  dispatchCalEvent({ type: "delete", payload: selectedEvent });
                   deleteItem(selectedEvent);
-                  console.log("Delete item id:", update.call.id);
                   setShowEventModal(false);
                 }}
                 className="material-icons-outlined text-gray-400 cursor-pointer">
@@ -175,7 +211,7 @@ export default function EventModal() {
               type="date"
               name="endDate"
               value={endDate}
-              className="pt-3 border-0 text-gray-600 pb-2 w-full sborder-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
+              className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
               onChange={(e) => setEndDate(e.target.value)}  // 종료 날짜 입력 필드
             />
           </div>
@@ -189,8 +225,3 @@ export default function EventModal() {
     </div>
   );
 }
-
-
-
-//TODO: 색상 수 늘리기 (노션 피드백 1차 배포 결과 참고)
-//ERROR: 삭제하고 나서 새로고침하면 계속 삭제한게 출력
