@@ -1,30 +1,47 @@
-import React, { useContext } from 'react'
-import GlobalContext from '../context/GlobalContext'
+import React, { useContext, useState } from 'react';
+import GlobalContext from '../context/GlobalContext';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 export default function Labels() {
-    const { labels, display, updateLabel } = useContext(GlobalContext);  // GlobalContext에서 labels와 updateLabel을 가져옴.
+    const { labels, display, updateLabel } = useContext(GlobalContext); // Fetch labels and updateLabel from context
+    const [isLabelsCollapsed, setIsLabelsCollapsed] = useState(false); // State to manage the visibility of labels
+
+    const toggleLabels = () => {
+        setIsLabelsCollapsed(prev => !prev);
+    };
+
     return (
         <React.Fragment>
-            <p className="text-gray-500 font-bold mt-10">
-                필터
-            </p>
-            {labels.map(({ label: lbl, display, checked }, idx) => ( // labels 배열을 순회하며 각 라벨을 표시합니다.
-                <label key={idx} className="items-center mt-3 block">  {/* 라벨을 표시하기 위한 레이블을 설정합니다. */}
-                    <input
-                        type="checkbox" //체크박스
-                        checked={checked} //현재 라벨의 체크 여부를 반영.
-                        onChange={() => updateLabel({ label: lbl, checked: !checked })}   //체크 상태 변경시 updateLabel 함수를 호출해 상태 업데이트
-                        className={`form-checkbox h-5 w-5 text-${lbl}-400 rounded focus:ring-0 cursor-pointer`}    //체크박스의 스타일 설정
-                    />
-                    <span className="ml-2 text-gray-700 capitalize">
-                        {lbl}  {/* 라벨 이름을 표시합니다. */}
-                    </span>
-                </label>
-            ))}
-        </React.Fragment>
+            <div className="flex items-center mb-4">
+                <p className="text-gray-500 font-bold mt-10 mr-2">필터</p>
+                <button
+                    className="p-1 rounded flex items-center align-middle mt-10"
+                    onClick={toggleLabels}
+                    aria-label={isLabelsCollapsed ? "Expand Labels" : "Collapse Labels"}
+                >
+                    {isLabelsCollapsed ? (
+                        <ExpandMoreIcon className="w-5 h-5 text-gray-600" />
+                    ) : (
+                        <ExpandLessIcon className="w-5 h-5 text-gray-600" />
+                    )}
+                </button>
+            </div>
+            <div className={`transition-max-height duration-300 overflow-hidden ${isLabelsCollapsed ? 'max-h-0' : 'max-h-full'}`}>
+                {labels.map(({ label: lbl, display, checked }, idx) => (
+                    <label key={idx} className="items-center mt-3 block">
+                        <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => updateLabel({ label: lbl, checked: !checked })}
+                            className={`form-checkbox h-5 w-5 text-${lbl}-400 rounded focus:ring-0 cursor-pointer`}
+                        />
+                        <span className="ml-2 text-gray-700 capitalize">
+                            {lbl}
+                        </span>
+                    </label>
+                ))}
+            </div>
+        </React.Fragment >
     );
 }
-
-
-
-
