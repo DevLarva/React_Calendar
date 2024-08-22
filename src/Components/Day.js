@@ -2,50 +2,95 @@ import React, { useContext, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import GlobalContext from "../context/GlobalContext";
+import { fetchPublicHolidays } from './HolidayApi'; // 실제 경로로 수정
 
 dayjs.extend(isBetween);
 
 export default function Day({ day, rowIdx }) {
   const { filteredEvents, setDaySelected, setShowEventModal, setSelectedEvent } = useContext(GlobalContext);
   const [dayEvents, setDayEvents] = useState([]);
+  const [holidays, setHolidays] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const events = filteredEvents.filter(
-      (evt) => dayjs(day).isBetween(dayjs(evt.startDate), dayjs(evt.endDate), 'day', '[]')
-    );
-    setDayEvents(events);
+    // 공휴일 API에서 데이터를 가져오는 함수
+    const loadHolidays = async () => {
+      try {
+        const year = dayjs().year(); // 현재 연도
+        const month = dayjs().month() + 1; // 현재 월 (0 기반이므로 1을 더함)
+        const holidays = await fetchPublicHolidays(year, month);
+        setHolidays(holidays.map(holiday => dayjs(holiday.locdate.toString()))); // locdate 필드 사용
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
+    };
+
+    loadHolidays();
+  }, []);
+
+  useEffect(() => {
+    if (day) {
+      //기본
+      const allEvents = filteredEvents.filter(
+        (evt) => dayjs(day).isBetween(dayjs(evt.startDate), dayjs(evt.endDate), 'day', '[]')
+      );
+      //단일
+      const singleDayEvents = allEvents.filter(
+        (evt) => dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day')
+      );
+      //다중
+      const multiDayEvents = allEvents.filter(
+        (evt) => !dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day')
+      );
+      setDayEvents([...multiDayEvents, ...singleDayEvents]);
+    }
   }, [filteredEvents, day]);
 
   function getCurrentDayClass() {
-    return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY") ? 'bg-blue-600 text-white rounded-full w-7' : '';
+    return day && day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
+      ? 'bg-blue-600 text-white rounded-full w-7'
+      : '';
+  }
+
+  function getHolidayClass() {
+    return holidays.some(holiday => dayjs(day).isSame(holiday, 'day'))
+      ? 'bg-red-600 text-white rounded-full w-7'
+      : '';
   }
 
   function getEventPositionClass(evt) {
-    const isStartDay = dayjs(day).isSame(dayjs(evt.startDate), 'day');
-    const isEndDay = dayjs(day).isSame(dayjs(evt.endDate), 'day');
+    const isStartDay = day && dayjs(day).isSame(dayjs(evt.startDate), 'day');
+    const isEndDay = day && dayjs(day).isSame(dayjs(evt.endDate), 'day');
     const isSingleDay = isStartDay && isEndDay;
 
     if (isSingleDay) {
-      return 'rounded-lg';  // 모든 모서리가 약간 둥근 사각형
+      return 'rounded-full px-1 py-1.5';  // 모든 모서리가 둥글고 추가 패딩
     } else if (isStartDay) {
-      return 'rounded-l-lg'; // 왼쪽 모서리가 둥근 사각형
+      return 'rounded-l-lg px-2 py-1'; // 왼쪽 모서리가 둥글고 패딩 추가
     } else if (isEndDay) {
-      return 'rounded-r-lg'; // 오른쪽 모서리가 둥근 사각형
+      return 'rounded-r-lg px-2 py-1'; // 오른쪽 모서리가 둥글고 패딩 추가
     } else {
-      return 'rounded-none'; // 모서리 둥근 모양 없음 (직각 사각형)
+      return 'rounded-none px-2 py-1'; // 모서리 둥근 모양 없음, 패딩 추가
     }
   }
 
+  if (loading) return <p>Loading</p>;
+  if (error) return <p>Error loading holidays: {error.message}</p>;
 
   return (
     <div className="border border-gray-200 flex flex-col">
       <header className="flex flex-col items-center">
-        {rowIdx === 0 && (
+        {rowIdx === 0 && day && (
           <p className="text-sm mt-1">{day.format('ddd').toUpperCase()}</p>
         )}
-        <p className={`text-sm p-1 my-1 text-center ${getCurrentDayClass()}`}>
-          {day.format('DD')}
-        </p>
+        {day && (
+          <p className={`text-sm p-1 my-1 text-center ${getCurrentDayClass()} ${getHolidayClass()}`}>
+            {day.format('DD')}
+          </p>
+        )}
       </header>
       <div
         className="flex-1 cursor-pointer"
@@ -58,11 +103,10 @@ export default function Day({ day, rowIdx }) {
           <div
             key={idx}
             onClick={() => setSelectedEvent(evt)}
-            className={`bg-${evt.label}-200 p-1.5 text-gray-600 text-sm mb-2 truncate ${getEventPositionClass(evt)}`}
+            className={`bg-${evt.label}-200 text-gray-600 text-sm mb-2 truncate ${getEventPositionClass(evt)}`}
             style={{
-              marginRight: dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '2px' : '0',
-              paddingLeft: '2px',
-              paddingRight: '2px',
+              marginRight: day && dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '2px' : '0',
+              paddingRight: dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '10px' : '2px', // 조건에 따라 패딩 설정
               width: 'calc(100% + 2px)',  // 이 부분은 스타일이 균일하게 채워지도록 합니다.
             }}
           >
@@ -74,3 +118,5 @@ export default function Day({ day, rowIdx }) {
     </div>
   );
 }
+
+
