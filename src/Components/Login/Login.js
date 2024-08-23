@@ -1,14 +1,16 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import GlobalContext from './Context/LoginContext';
+import CalendarContext from '../../context/GlobalContext'; // CalendarContext import
 import { Box, TextField, Button, Container, Typography, Paper, Grid, InputAdornment, IconButton, Divider } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Andnlogo from "../../assets/andnlogo.png"
-import { signin } from '../ApiService'; // Import signin function
+import { signin, call } from '../ApiService'; // Import signin and call functions
 
 const Login = () => {
     const { setUser } = useContext(GlobalContext);
+    const { dispatchCalEvent } = useContext(CalendarContext); // context에서 dispatchCalEvent 불러오기
     const [userId, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -29,18 +31,27 @@ const Login = () => {
 
             if (userType) {
                 setUser({ userId, userType });
-                console.log("타입", userType)
+                console.log("타입", userType);
+
                 // 사용자 타입에 따라 리다이렉트
                 switch (userType) {
                     case 'ROLE_ANDN':
+                        // 달력 데이터를 먼저 가져오기
+                        const calendarData = await call('/api/andnCalendar/todo', 'GET');
+                        dispatchCalEvent({ type: 'set', payload: calendarData });
+                        console.log("달력 데이터 얼리 패치", calendarData);
+                        // 달력 페이지로 리다이렉트
                         navigate('/calendar');
                         break;
+
                     case 'ROLE_CLIENT':
                         navigate('/client');
                         break;
+
                     case 'ROLE_OUTSOURCING':
                         navigate('/OutsourcingMain');
                         break;
+
                     default:
                         navigate('/');
                 }
@@ -62,6 +73,7 @@ const Login = () => {
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
+
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
             handleLogin();
