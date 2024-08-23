@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import GlobalContext from "../context/GlobalContext";
-import { fetchPublicHolidays } from './HolidayApi'; // 실제 경로로 수정
+import axios from 'axios';
 
 dayjs.extend(isBetween);
 
@@ -15,12 +15,12 @@ export default function Day({ day, rowIdx }) {
 
   useEffect(() => {
     // 공휴일 API에서 데이터를 가져오는 함수
-    const loadHolidays = async () => {
+    const fetchHolidays = async () => {
       try {
-        const year = dayjs().year(); // 현재 연도
-        const month = dayjs().month() + 1; // 현재 월 (0 기반이므로 1을 더함)
-        const holidays = await fetchPublicHolidays(year, month);
-        setHolidays(holidays.map(holiday => dayjs(holiday.locdate.toString()))); // locdate 필드 사용
+        const year = dayjs().year();
+        console.log("연도:", year)
+        const response = await axios.get(`https://date.nager.at/Api/v2/PublicHolidays/${year}/KR`);
+        setHolidays(response.data.map(holiday => dayjs(holiday.date)));
         setLoading(false);
       } catch (err) {
         setError(err);
@@ -28,8 +28,9 @@ export default function Day({ day, rowIdx }) {
       }
     };
 
-    loadHolidays();
+    fetchHolidays();
   }, []);
+
 
   useEffect(() => {
     if (day) {
@@ -77,8 +78,8 @@ export default function Day({ day, rowIdx }) {
     }
   }
 
-  if (loading) return <p>Loading</p>;
-  if (error) return <p>Error loading holidays: {error.message}</p>;
+  if (loading) return <p>...</p>;
+  if (error) return <p>Error 관리자에게 문의 {error.message}</p>;
 
   return (
     <div className="border border-gray-200 flex flex-col">
