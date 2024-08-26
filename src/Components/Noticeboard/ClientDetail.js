@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Paper, Typography, Grid, Box, Divider, Container, IconButton } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClientsDetail, downloadFile, delClientPost } from '../../api'; // 새로운 API 호출 함수 (상세보기 데이터를 가져옴)
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
 import { getToken } from '../../auth'; // 토큰 가져오는 함수
-
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function ClientPostDetail() {
     const { id } = useParams(); // URL 파라미터에서 게시물 ID를 가져옴
@@ -14,10 +13,8 @@ export default function ClientPostDetail() {
     const [post, setPost] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
 
-
-    // 사용자가 작성자인지 여부를 확인하는 상태
     useEffect(() => {
-        // 게시물 세부 정보 가져오기
+        // 게시물 상세정보 가져오기
         getClientsDetail(id)
             .then(response => {
                 setPost(response);
@@ -30,7 +27,7 @@ export default function ClientPostDetail() {
                     console.log("토큰", typeof currentUserId);
                     console.log("아이디", typeof response.authorId);
 
-                    if (toString(response.authorId) === toString(currentUserId)) {
+                    if (response.authorId == currentUserId) {
                         setIsOwner(true);
                     } else {
                         setIsOwner(false);
@@ -38,13 +35,10 @@ export default function ClientPostDetail() {
                 }
             })
             .catch(error => {
-                console.error('Error fetching post details:', error);
+                console.error('게시물 불러오기 중 오류 발생:', error);
+                navigate('/error'); // 오류 발생 시 다른 페이지로 이동
             });
     }, [id, navigate]);
-
-    if (!post) {
-        return <div>.</div>;
-    }
 
     const handleDownload = async (fileUrl) => {
         try {
@@ -56,6 +50,7 @@ export default function ClientPostDetail() {
 
     const handleEdit = () => {
         // 편집 페이지로 이동console.log('게시물이 성공적으로 수정되었습니다');
+        navigate(`/client/posts/edit`, { state: { postData: post } });
     };
 
     const handleDelete = async () => {
@@ -63,7 +58,6 @@ export default function ClientPostDetail() {
         if (!confirmDelete) {
             return; // 사용자가 삭제를 취소한 경우 함수 종료
         }
-
         try {
             await delClientPost(id); // 삭제 API 호출
             console.log('게시물이 성공적으로 삭제되었습니다');
@@ -72,6 +66,10 @@ export default function ClientPostDetail() {
             console.error('게시물 삭제 중 오류 발생:', error);
         }
     };
+
+    if (!post) {
+        return <div>.</div>;
+    }
 
     return (
         <Container component="main" maxWidth="md">
@@ -141,28 +139,23 @@ export default function ClientPostDetail() {
                     <Grid item xs={12}>
                         <Typography variant="h6">그래픽 신청 내역</Typography>
                         <Divider />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="h6">첨부 파일</Typography>
-                        <Divider />
                         <Box>
                             {post.fileUrls && post.fileUrls.length > 0 ? (
                                 post.fileUrls.map((file, index) => (
                                     <Box key={index} sx={{ mt: 1 }}>
                                         <Typography variant="body2">
                                             <strong>파일 {index + 1}:</strong>{' '}
-                                            <button
-                                                onClick={() => handleDownload(file.url)}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    color: 'black',
-                                                    textDecoration: 'underline',
-                                                    cursor: 'pointer'
+                                            <a
+                                                href="#"
+                                                onClick={(event) => {
+                                                    event.preventDefault();
+                                                    handleDownload(file.url);
                                                 }}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
                                             >
-                                                {decodeURIComponent(file.url.split('/').pop())}
-                                            </button>
+                                                {decodeURIComponent(file.url.split('/').pop())} {/* 파일명을 디코딩하여 표시 */}
+                                            </a>
                                         </Typography>
                                     </Box>
                                 ))

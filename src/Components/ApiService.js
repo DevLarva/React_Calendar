@@ -82,4 +82,3 @@ export function checkUserId(userDTO) {
       alert("중복된 아이디가 존재합니다. 다시 입력해주세요.");
     });
 }
-

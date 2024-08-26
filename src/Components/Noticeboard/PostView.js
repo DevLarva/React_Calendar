@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paper, Typography, Grid, TextField, Button, Box, Checkbox, FormGroup, FormControlLabel, IconButton } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, ListItemText, OutlinedInput } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DatePicker from 'react-datepicker';
@@ -21,7 +22,7 @@ export default function PostView({ onPostSaved }) {
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [designer, setDesigner] = useState('');
     const [outsourcingOptions, setOutsourcingOptions] = useState([]);
-    const [selectedOutsourcingId, setSelectedOutsourcingId] = useState('');
+    const [selectedOutsourcingId, setSelectedOutsourcingId] = useState([]);
 
     useEffect(() => {
         // Fetch outsourcing options
@@ -40,13 +41,18 @@ export default function PostView({ onPostSaved }) {
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: 'image/*, application/pdf',
+        accept: 'image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/csv',
         maxSize: 3145728 // 3MB
     });
 
     const handleFileRemove = (fileToRemove) => {
         setSelectedFiles((prevFiles) => prevFiles.filter(file => file !== fileToRemove));
     };
+
+
+    // const handleSelectionChange = (event) => {
+    //   setSelectedOutsourcingIds(event.target.value);
+    // };
 
     const handleSubmit = async () => {
         if (!title) {
@@ -62,7 +68,7 @@ export default function PostView({ onPostSaved }) {
             formData.append('boothWidth', boothWidth);
             formData.append('boothHeight', boothHeight);
             formData.append('designer', designer);
-            formData.append('outsourcingId', selectedOutsourcingId);
+            // formData.append('outsourcingUsers', selectedOutsourcingId);
 
             console.log(formData)
 
@@ -77,7 +83,12 @@ export default function PostView({ onPostSaved }) {
             }
 
             selectedFiles.forEach(file => {
+                console.log(file)
                 formData.append('files', file);
+            });
+
+            selectedOutsourcingId.forEach(user => {
+                formData.append('outsourcingId', user);
             });
 
             console.log('FormData 내용 확인:', formData.get('installDate'));
@@ -103,7 +114,7 @@ export default function PostView({ onPostSaved }) {
         setInstallDate(['', '']);
         setSelectedFiles([]);
         setDesigner('');
-        setSelectedOutsourcingId('');
+        setSelectedOutsourcingId([]);
         navigate('/andn');
     };
 
@@ -114,7 +125,7 @@ export default function PostView({ onPostSaved }) {
                 글 작성
             </Typography>
             <FormGroup>
-                {/* <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" /> */}
+                <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" />
             </FormGroup>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -239,25 +250,23 @@ export default function PostView({ onPostSaved }) {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField
-                        select
-                        variant="outlined"
-                        fullWidth
-                        value={selectedOutsourcingId}
-                        onChange={(e) => setSelectedOutsourcingId(e.target.value)}
-                        SelectProps={{
-                            native: true,
-                        }}
-                        required
-                        autoComplete="off"
-                    >
-                        <option value="">외주업체 선택</option>
-                        {outsourcingOptions.map(option => (
-                            <option key={option.id} value={option.id}>
-                                {option.name}
-                            </option>
-                        ))}
-                    </TextField>
+                    <FormControl variant="outlined" fullWidth required>
+                        <InputLabel>외주업체 선택</InputLabel>
+                        <Select
+                            multiple
+                            value={selectedOutsourcingId}
+                            onChange={(e) => setSelectedOutsourcingId(e.target.value)}
+                            input={<OutlinedInput label="외주업체 선택" />}
+                            renderValue={(selected) => selected.map(id => outsourcingOptions.find(option => option.id === id).name).join(', ')}
+                        >
+                            {outsourcingOptions.map(option => (
+                                <MenuItem key={option.id} value={option.id}>
+                                    <Checkbox checked={selectedOutsourcingId.indexOf(option.id) > -1} />
+                                    <ListItemText primary={option.name} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Button

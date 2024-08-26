@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Paper, Typography, Grid, TextField, Button, Box, IconButton } from '@mui/material';
+import { Paper, Typography, Grid, TextField, Button, Box, Checkbox, FormGroup, FormControlLabel, IconButton } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, ListItemText, OutlinedInput } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from 'date-fns';
@@ -9,22 +10,42 @@ import { ko } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
 import { patchAndnPost, getOutsourcingUsers } from '../../api';
 
-export default function PostEditView() {
+export default function PostEditView({ onPostSaved }) {
     const navigate = useNavigate();
+
+    // 접두사 부분을 제거하는 함수
+    const removePrefix = (filename) => {
+        const parts = filename.split('_');
+        if (parts.length > 1) {
+            return parts.slice(1).join('_'); // 첫 번째 부분을 제거하고 나머지 부분을 합침
+        }
+        return filename; // 접두사가 없는 경우 원래 파일명 반환
+    };
+
     const location = useLocation();
-    const [postData, setPostData] = useState(location.state?.postData || {});
-    const [selectedFiles, setSelectedFiles] = useState([]); // 새로 첨부된 파일 상태
-    const [initialFiles, setInitialFiles] = useState([]); // 수정 전 파일 상태
+    const [postData, setPostData] = useState(location.state?.postData || null);
+
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [filesToDelete, setFilesToDelete] = useState([]);
+
     const [outsourcingOptions, setOutsourcingOptions] = useState([]);
+    const [selectedOutsourcingId, setSelectedOutsourcingId] = useState(
+        postData?.outsourcingUsers?.map(user => user.outsourcingId) || []
+    );
 
     useEffect(() => {
         if (location.state?.postData) {
             setPostData(location.state.postData);
-            setInitialFiles(location.state.postData.fileUrls || []); // 파일 URL을 초기화
+            setSelectedFiles(location.state.postData.fileUrls.map(fileUrl => ({
+                id: fileUrl.id,
+                name: removePrefix(decodeURIComponent(fileUrl.url.split('/').pop())),
+                url: fileUrl.url,
+            })));
         }
     }, [location.state]);
 
     useEffect(() => {
+        // Fetch outsourcing options
         getOutsourcingUsers()
             .then(response => {
                 setOutsourcingOptions(response);
@@ -35,21 +56,28 @@ export default function PostEditView() {
     }, []);
 
     const onDrop = useCallback((acceptedFiles) => {
-        setSelectedFiles((prevFiles) => {
-            const newFiles = acceptedFiles.map(file => ({ file, name: file.name }));
-            return [...prevFiles, ...newFiles];
-        });
+        setSelectedFiles(prevFiles => [
+            ...prevFiles,
+            ...acceptedFiles.map(file => ({
+                file,
+                name: file.name,
+                url: URL.createObjectURL(file),
+            }))
+        ]);
     }, []);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
-        accept: 'image/*, application/*',
-        maxSize: 3145728 // 3MB
+        accept: 'image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/csv',
+        maxSize: 3145728 // 3MB 
     });
 
     const handleFileRemove = (fileToRemove) => {
-        setSelectedFiles((prevFiles) => prevFiles.filter(file => file.file !== fileToRemove.file));
-        setInitialFiles((prevFiles) => prevFiles.filter(file => file.fileUrl !== fileToRemove.fileUrl));
+        setSelectedFiles(prevFiles => prevFiles.filter(file => file !== fileToRemove));
+        if (fileToRemove.id) {
+            setFilesToDelete(prevFiles => [...prevFiles, fileToRemove.id]);
+            console.log("삭제 글 id", fileToRemove);
+        }
     };
 
     const handleSubmit = async () => {
@@ -66,9 +94,8 @@ export default function PostEditView() {
             formData.append('boothWidth', postData.boothWidth);
             formData.append('boothHeight', postData.boothHeight);
             formData.append('content', postData.content);
-            formData.append('outsourcingId', postData.outsourcingId);
 
-            if (postData.installDate[0] && postData.installDate[1]) {
+            if (postData.installDate && postData.installDate[0] && postData.installDate[1]) {
                 const formattedInstallDates = [
                     format(new Date(postData.installDate[0]), 'yyyy-MM-dd'),
                     format(new Date(postData.installDate[1]), 'yyyy-MM-dd')
@@ -76,12 +103,29 @@ export default function PostEditView() {
                 formData.append('installDate', formattedInstallDates);
             }
 
-            // 수정 전 파일과 새로 첨부된 파일 모두 formData에 추가
-            [...initialFiles, ...selectedFiles].forEach(file => {
-                formData.append('files', file.file);
+            selectedFiles.forEach(file => {
+                if (file.file instanceof File) {
+                    formData.append('files', file.file);
+                }
             });
 
+            // Add files to delete
+            if (filesToDelete.length > 0) {
+                formData.append('filesToDelete', filesToDelete);
+            }
+
+            selectedOutsourcingId.forEach(user => {
+                formData.append('outsourcingId', user); // Assuming `outsourcingId` is used in form submission
+            });
+            console.log('FormData Entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            // formData.append('outsourcingUsers', 7);
             await patchAndnPost(postData.id, formData); // API 호출
+
+            // onPostSaved(); // 콜백 호출
             navigate(`/andn/posts/${postData.id}`);
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
@@ -92,11 +136,15 @@ export default function PostEditView() {
         navigate(`/andn/posts/${postData.id}`);
     };
 
+
     return (
         <Paper sx={{ p: 3, mt: 3 }}>
             <Typography variant="h5" gutterBottom>
                 글 작성
             </Typography>
+            <FormGroup>
+                <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" />
+            </FormGroup>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <TextField
@@ -172,8 +220,8 @@ export default function PostEditView() {
                     <DatePicker
                         locale={ko}
                         selectsRange
-                        startDate={postData.installDate[0]}
-                        endDate={postData.installDate[1]}
+                        startDate={postData.installDate != null ? postData.installDate[0] : null}
+                        endDate={postData.installDate != null ? postData.installDate[1] : null}
                         onChange={(dates) => {
                             const [start, end] = dates;
                             setPostData({ ...postData, installDate: [start, end] });
@@ -194,34 +242,12 @@ export default function PostEditView() {
                             파일당 최대 3MB
                         </Typography>
                     </Box>
-                    {initialFiles.length > 0 && (
-                        <Box mt={2}>
-                            <Typography variant="h6">수정 전 첨부 파일</Typography>
-                            {initialFiles.map((file, index) => {
-                                // URL에서 파일 이름 추출
-                                const fileName = file.url.split('/').pop();
-                                return (
-                                    <Box key={`initial-${index}`} display="flex" alignItems="center" justifyContent="space-between">
-                                        <Typography variant="body2">
-                                            {fileName}
-                                        </Typography>
-                                        <IconButton onClick={() => handleFileRemove(file)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Box>
-                                );
-                            })}
-                        </Box>
-                    )}
-
-
                     {selectedFiles.length > 0 && (
                         <Box mt={2}>
-                            <Typography variant="h6">새로 첨부된 파일</Typography>
                             {selectedFiles.map((file, index) => (
-                                <Box key={`selected-${index}`} display="flex" alignItems="center" justifyContent="space-between">
+                                <Box key={index} display="flex" alignItems="center" justifyContent="space-between">
                                     <Typography variant="body2">
-                                        {file.name} {/* 새로 첨부된 파일 이름 출력 */}
+                                        {file.name}
                                     </Typography>
                                     <IconButton onClick={() => handleFileRemove(file)}>
                                         <DeleteIcon />
@@ -245,25 +271,30 @@ export default function PostEditView() {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <TextField
-                        select
-                        variant="outlined"
-                        fullWidth
-                        value={postData.outsourcingId}
-                        onChange={(e) => setPostData({ ...postData, outsourcingId: e.target.value })}
-                        SelectProps={{
-                            native: true,
-                        }}
-                        required
-                        autoComplete="off"
-                    >
-                        <option value="">외주업체 선택</option>
-                        {outsourcingOptions.map(option => (
-                            <option key={option.id} value={option.id}>
-                                {option.name}
-                            </option>
-                        ))}
-                    </TextField>
+                    <FormControl variant="outlined" fullWidth required>
+                        <InputLabel>외주업체 선택</InputLabel>
+                        <Select
+                            multiple
+                            value={selectedOutsourcingId}
+                            onChange={(e) => setSelectedOutsourcingId(e.target.value)}
+                            input={<OutlinedInput label="외주업체 선택" />}
+                            renderValue={(selected) =>
+                                outsourcingOptions.length > 0
+                                    ? selected.map(id => {
+                                        const option = outsourcingOptions.find(option => option.id === id);
+                                        return option ? option.name : '';
+                                    }).join(', ')
+                                    : ''
+                            }
+                        >
+                            {outsourcingOptions.map(option => (
+                                <MenuItem key={option.id} value={option.id}>
+                                    <Checkbox checked={selectedOutsourcingId.indexOf(option.id) > -1} />
+                                    <ListItemText primary={option.name} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <Button
@@ -272,7 +303,7 @@ export default function PostEditView() {
                         fullWidth
                         onClick={handleSubmit}
                     >
-                        수정 완료
+                        제출
                     </Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>

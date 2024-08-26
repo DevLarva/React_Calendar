@@ -1,35 +1,59 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Paper, Typography, Grid, TextField, Button, Box, Container, Divider, IconButton } from '@mui/material';
-import { useDropzone } from 'react-dropzone';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Paper, Typography, Grid, TextField, Button, Box, Divider, Container, IconButton } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, ListItemText, OutlinedInput } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
-import { saveClientPost } from '../../api'; // Assuming saveClientPost is an API function you have set up
+import { useDropzone } from 'react-dropzone';
+import { patchClientPost } from '../../api';
 
-export default function ClientPostView({ onClientPostSaved }) {
-    const [eventName, setEventName] = useState('');
-    const [companyName, setCompanyName] = useState('');
-    const [manager, setManager] = useState('');
-    const [callNumber, setCallNumber] = useState('');
-    const [location, setLocation] = useState('');
-    const [boothLayout, setBoothLayout] = useState('');
-    const [boothManager, setBoothManager] = useState('');
-    const [boothCallNumber, setBoothCallNumber] = useState('');
-    const [installDate, setInstallDate] = useState('');
-    const [removeDate, setRemoveDate] = useState('');
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [applicant, setApplicant] = useState('');
-    const [applicantNum, setApplicantNum] = useState('');
-    const [collectionDay, setCollectionDay] = useState('');       //확인 요망
-    const [collectionLoc, setCollectionLoc] = useState('');         //확인 요망
-    const [memo, setMemo] = useState('');
+
+export default function ClientEditView({ onPostSaved }) {
     const navigate = useNavigate();
 
+    // 접두사 부분을 제거하는 함수
+    const removePrefix = (filename) => {
+        const parts = filename.split('_');
+        if (parts.length > 1) {
+            return parts.slice(1).join('_'); // 첫 번째 부분을 제거하고 나머지 부분을 합침
+        }
+        return filename; // 접두사가 없는 경우 원래 파일명 반환
+    };
+
+    const location = useLocation();
+    const [postData, setPostData] = useState(location.state?.postData || null);
+
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [filesToDelete, setFilesToDelete] = useState([]);
+
+    //   const [outsourcingOptions, setOutsourcingOptions] = useState([]);
+    //   const [selectedOutsourcingId, setSelectedOutsourcingId] = useState(
+    //     postData?.outsourcingUsers?.map(user => user.outsourcingId) || []
+    // );
+
+    useEffect(() => {
+        if (location.state?.postData) {
+            setPostData(location.state.postData);
+            setSelectedFiles(location.state.postData.fileUrls.map(fileUrl => ({
+                id: fileUrl.id,
+                name: removePrefix(decodeURIComponent(fileUrl.url.split('/').pop())),
+                url: fileUrl.url,
+            })));
+        }
+    }, [location.state]);
+
     const onDrop = useCallback((acceptedFiles) => {
-        setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+        setSelectedFiles(prevFiles => [
+            ...prevFiles,
+            ...acceptedFiles.map(file => ({
+                file,
+                name: file.name,
+                url: URL.createObjectURL(file),
+            }))
+        ]);
     }, []);
 
     const { getRootProps, getInputProps } = useDropzone({
@@ -39,60 +63,57 @@ export default function ClientPostView({ onClientPostSaved }) {
     });
 
     const handleFileRemove = (fileToRemove) => {
-        setSelectedFiles((prevFiles) => prevFiles.filter(file => file !== fileToRemove));
+        setSelectedFiles(prevFiles => prevFiles.filter(file => file !== fileToRemove));
+        if (fileToRemove.id) {
+            setFilesToDelete(prevFiles => [...prevFiles, fileToRemove.id]);
+            console.log("삭제 글 id", fileToRemove);
+        }
     };
 
     const handleSubmit = async () => {
+        if (!postData.eventName) {
+            alert('행사명을 입력해주세요.');
+            return;
+        }
         try {
             const formData = new FormData();
-            formData.append('eventName', eventName);
-            formData.append('companyName', companyName);
-            formData.append('manager', manager);
-            formData.append('callNumber', callNumber);
-            formData.append('location', location);
-            formData.append('boothLayout', boothLayout);
-            formData.append('boothManager', boothManager);
-            formData.append('boothCallNumber', boothCallNumber);
-            formData.append('installDate', installDate);
-            formData.append('removeDate', removeDate);
-            formData.append('applicant', applicant);
-            formData.append('applicantNum', applicantNum);
-            formData.append('collectionDay', collectionDay);
-            formData.append('collectionLoc', collectionLoc);
-            formData.append('memo', memo);
+            formData.append('eventName', postData.eventName);
+            formData.append('companyName', postData.companyName);
+            formData.append('manager', postData.manager);
+            formData.append('callNumber', postData.callNumber);
+            formData.append('location', postData.location);
+            formData.append('boothLayout', postData.boothLayout);
+            formData.append('boothManager', postData.boothManager);
+            formData.append('boothCallNumber', postData.boothCallNumber);
+            formData.append('installDate', postData.installDate);
+            formData.append('removeDate', postData.removeDate);
+            formData.append('applicant', postData.applicant);
+            formData.append('applicantNum', postData.applicantNum);
+            formData.append('collectionDay', postData.collectionDay);
+            formData.append('collectionLoc', postData.collectionLoc);
+            formData.append('memo', postData.memo);
 
             selectedFiles.forEach(file => {
-                formData.append('files', file);
+                if (file.file instanceof File) {
+                    formData.append('files', file.file);
+                }
             });
 
-            await saveClientPost(formData);
-            console.log('게시물이 성공적으로 저장되었습니다');
-            onClientPostSaved();
-            navigate('/client');
+            if (filesToDelete.length > 0) {
+                formData.append('filesToDelete', filesToDelete);
+            }
 
+            await patchClientPost(postData.id, formData); // API 호출
+
+            // onPostSaved(); // 콜백 호출
+            navigate(`/client/posts/${postData.id}`);
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
     };
 
     const handleCancel = () => {
-        setEventName('');
-        setCompanyName('');
-        setManager('');
-        setCallNumber('');
-        setLocation('');
-        setBoothLayout('');
-        setBoothManager('');
-        setBoothCallNumber('');
-        setInstallDate('');
-        setRemoveDate('');
-        setSelectedFiles([]);
-        setApplicant('');
-        setApplicantNum('');
-        setCollectionDay('');
-        setCollectionLoc('');
-        setMemo('');
-        navigate('/client');
+        navigate(`/client/posts/${postData.id}`);
     };
 
     return (
@@ -111,8 +132,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="행사명"
                             variant="outlined"
                             fullWidth
-                            value={eventName}
-                            onChange={(e) => setEventName(e.target.value)}
+                            value={postData.eventName}
+                            onChange={(e) => setPostData({ ...postData, eventName: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -122,8 +143,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="업체명"
                             variant="outlined"
                             fullWidth
-                            value={companyName}
-                            onChange={(e) => setCompanyName(e.target.value)}
+                            value={postData.companyName}
+                            onChange={(e) => setPostData({ ...postData, companyName: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -133,8 +154,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="담당자"
                             variant="outlined"
                             fullWidth
-                            value={manager}
-                            onChange={(e) => setManager(e.target.value)}
+                            value={postData.manager}
+                            onChange={(e) => setPostData({ ...postData, manager: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -144,8 +165,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="연락처"
                             variant="outlined"
                             fullWidth
-                            value={callNumber}
-                            onChange={(e) => setCallNumber(e.target.value)}
+                            value={postData.callNumber}
+                            onChange={(e) => setPostData({ ...postData, callNumber: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -155,8 +176,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="행사 장소"
                             variant="outlined"
                             fullWidth
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
+                            value={postData.location}
+                            onChange={(e) => setPostData({ ...postData, location: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -166,8 +187,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="부스 배치도"
                             variant="outlined"
                             fullWidth
-                            value={boothLayout}
-                            onChange={(e) => setBoothLayout(e.target.value)}
+                            value={postData.boothLayout}
+                            onChange={(e) => setPostData({ ...postData, boothLayout: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -181,8 +202,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="담당자"
                             variant="outlined"
                             fullWidth
-                            value={boothManager}
-                            onChange={(e) => setBoothManager(e.target.value)}
+                            value={postData.boothManager}
+                            onChange={(e) => setPostData({ ...postData, boothManager: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -192,8 +213,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="연락처"
                             variant="outlined"
                             fullWidth
-                            value={boothCallNumber}
-                            onChange={(e) => setBoothCallNumber(e.target.value)}
+                            value={postData.boothCallNumber}
+                            onChange={(e) => setPostData({ ...postData, boothCallNumber: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -201,8 +222,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                     <Grid item xs={6}>
                         <DatePicker
                             locale={ko}
-                            selected={installDate}
-                            onChange={(date) => setInstallDate(date)}
+                            selected={postData.installDate}
+                            onChange={(date) => setPostData({ ...postData, installDate: date })}
                             dateFormat="yyyy/MM/dd"
                             customInput={<TextField fullWidth label="설치 예정일시" variant="outlined" />}
                             autoComplete="off"
@@ -212,8 +233,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                     <Grid item xs={6}>
                         <DatePicker
                             locale={ko}
-                            selected={removeDate}
-                            onChange={(date) => setRemoveDate(date)}
+                            selected={postData.removeDate}
+                            onChange={(date) => setPostData({ ...postData, removeDate: date })}
                             dateFormat="yyyy/MM/dd"
                             customInput={<TextField fullWidth label="철거 예정일시" variant="outlined" />}
                             autoComplete="off"
@@ -259,8 +280,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="신청인"
                             variant="outlined"
                             fullWidth
-                            value={applicant}
-                            onChange={(e) => setApplicant(e.target.value)}
+                            value={postData.applicant}
+                            onChange={(e) => setPostData({ ...postData, applicant: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -270,8 +291,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="연락처"
                             variant="outlined"
                             fullWidth
-                            value={applicantNum}
-                            onChange={(e) => setApplicantNum(e.target.value)}
+                            value={postData.applicantNum}
+                            onChange={(e) => setPostData({ ...postData, applicantNum: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -279,8 +300,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                     <Grid item xs={6}>
                         <DatePicker
                             locale={ko}
-                            selected={collectionDay}
-                            onChange={(date) => setCollectionDay(date)}
+                            selected={postData.collectionDay}
+                            onChange={(date) => setPostData({ ...postData, collectionDay: date })}
                             dateFormat="yyyy/MM/dd"
                             customInput={<TextField fullWidth label="보관 일시" variant="outlined" />}
                             autoComplete="off"
@@ -292,8 +313,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="수거장소"
                             variant="outlined"
                             fullWidth
-                            value={collectionLoc}
-                            onChange={(e) => setCollectionLoc(e.target.value)}
+                            value={postData.collectionLoc}
+                            onChange={(e) => setPostData({ ...postData, collectionLoc: e.target.value })}
                             required
                             autoComplete="off"
                         />
@@ -303,8 +324,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             label="메모"
                             variant="outlined"
                             fullWidth
-                            value={memo}
-                            onChange={(e) => setMemo(e.target.value)}
+                            value={postData.memo}
+                            onChange={(e) => setPostData({ ...postData, memo: e.target.value })}
                             multiline
                             rows={4}
                             autoComplete="off"
@@ -335,18 +356,3 @@ export default function ClientPostView({ onClientPostSaved }) {
         </Container>
     );
 }
-
-
-
-/*
-Client
-- 행사명, 업체명, 담당자, 연락처, 장소, 부스 배치도
-부스담당자
-- 담당자, 연락처, 행사일시, 부스 사이즈, 설치 담당자, 설치 담당자 연락처, 설치예정일시, 철거예정일시
-그래픽 신청 내역
-(이미지 첨부)
-물품 픽업
-
-달력 수정
-TODO: 물품 픽업 관련 변수 추가
-*/

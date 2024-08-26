@@ -226,3 +226,8 @@ export default function EventModal() {
     </div>
   );
 }
+
+
+
+//TODO: 색상 수 늘리기 (노션 피드백 1차 배포 결과 참고)
+//ERROR: 삭제하고 나서 새로고침하면 계속 삭제한게 출력

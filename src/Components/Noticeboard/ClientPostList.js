@@ -68,36 +68,3 @@ export default function ClientPostList({ posts }) {
 ClientPostList.defaultProps = {
     posts: [],
 };
-
-
-// import React, { useState, useEffect } from 'react';
-// import { Box, Container } from '@mui/material';
-// import PostList from './PostList'; // PostList 컴포넌트 import
-// import NewPostButton from './NewPostButton'; // NewPostButton 컴포넌트 import
-// import { getClientArticles } from '../../api';
-// import { useNavigate } from 'react-router-dom';
-
-// function ClientPostList() {
-//     const [posts, setPosts] = useState([]);
-//     const navigate = useNavigate();
-
-//     useEffect(() => {
-//         const fetchPosts = async () => {
-//             try {
-//                 const data = await getClientArticles();
-//                 setPosts(data);
-//             } catch (error) {
-//                 console.error("외주업체 글 가져오기 실패:", error);
-//             }
-//         };
-//         fetchPosts();
-//     }, []);
-
-//     const handleNewPostClick = () => {
-//         navigate('/client/posts');
-//     };
-
-
-// }
-
-// export default ClientPostList;

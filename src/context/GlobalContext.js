@@ -60,7 +60,6 @@ export const GlobalContextProvider = ({ children }) => {
         call("/api/andnCalendar/todo", "GET")
             .then(response => {
                 dispatchCalEvent({ type: "set", payload: response });
-                console.log("Fetched events:", response);
             })
             .catch(error => console.error('Error fetching events:', error));
     }, []);
