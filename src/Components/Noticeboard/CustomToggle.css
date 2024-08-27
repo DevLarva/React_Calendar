@@ -1,0 +1,55 @@
+.toggle-container {
+    width: 60px; /* Slightly wider to fit icons */
+    height: 30px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding: 5px;
+    box-shadow: 0px 0px 5px #888888;
+  }
+  
+  .toggle-on {
+    background-color: #4CAF50; /* Green background */
+  }
+  
+  .toggle-off {
+    background-color: #F44336; /* Red background */
+  }
+  
+  .toggle-circle {
+    width: 26px;
+    height: 26px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    transition: transform 0.3s ease;
+    box-shadow: 0px 0px 5px #888888;
+  }
+  
+  .toggle-on .toggle-circle {
+    transform: translateX(30px); /* Move circle to the right */
+  }
+  
+  .toggle-off .toggle-circle {
+    transform: translateX(-3px); /* Keep circle on the left */
+  }
+  
+  .toggle-icon {
+    position: absolute;
+    font-size: 16px;
+    
+    color: white;
+    transition: color 0.1s ease;
+  }
+  
+  .toggle-on .toggle-icon {
+    left: 8px; /* Adjust position for checkmark (left side) */
+  }
+  
+  .toggle-off .toggle-icon {
+    right: 8px; /* Adjust position for X (right side) */
+  }
+  
