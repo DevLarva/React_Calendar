@@ -43,9 +43,13 @@ export default function Day({ day, rowIdx }) {
         (evt) => dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day')
       );
       //다중
-      const multiDayEvents = allEvents.filter(
-        (evt) => !dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day')
-      );
+      const multiDayEvents = allEvents
+        .filter((evt) => !dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day'))
+        .sort((a, b) => {
+          const aDuration = dayjs(a.endDate).diff(dayjs(a.startDate), 'day');
+          const bDuration = dayjs(b.endDate).diff(dayjs(b.startDate), 'day');
+          return bDuration - aDuration; // 긴 기간의 이벤트를 우선 순위로
+        });
       setDayEvents([...multiDayEvents, ...singleDayEvents]);
     }
   }, [filteredEvents, day]);
