@@ -146,7 +146,6 @@ export default function PostView({ onPostSaved }) {
                         fullWidth
                         value={locate}
                         onChange={(e) => setLocate(e.target.value)}
-                        required
                         autoComplete="off"
                     />
                 </Grid>
@@ -157,7 +156,6 @@ export default function PostView({ onPostSaved }) {
                         fullWidth
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        required
                         autoComplete="off"
                     />
                 </Grid>
@@ -168,7 +166,6 @@ export default function PostView({ onPostSaved }) {
                         fullWidth
                         value={designer}
                         onChange={(e) => setDesigner(e.target.value)}
-                        required
                         autoComplete="off"
                     />
                 </Grid>
@@ -181,7 +178,7 @@ export default function PostView({ onPostSaved }) {
                             variant="outlined"
                             value={boothWidth}
                             onChange={(e) => setBoothWidth(e.target.value.replace(/[^0-9]/g, ''))}
-                            required
+
                             sx={{ flex: 1 }}
                             autoComplete="off"
                         />
@@ -191,7 +188,7 @@ export default function PostView({ onPostSaved }) {
                             variant="outlined"
                             value={boothHeight}
                             onChange={(e) => setBoothHeight(e.target.value.replace(/[^0-9]/g, ''))}
-                            required
+
                             sx={{ flex: 1 }}
                             autoComplete="off"
                         />
@@ -245,12 +242,12 @@ export default function PostView({ onPostSaved }) {
                         rows={4}
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        required
+
                         autoComplete="off"
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <FormControl variant="outlined" fullWidth required>
+                    <FormControl variant="outlined" fullWidth >
                         <InputLabel>외주업체 선택</InputLabel>
                         <Select
                             multiple

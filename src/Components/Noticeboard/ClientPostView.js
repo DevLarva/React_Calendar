@@ -135,7 +135,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={manager}
                             onChange={(e) => setManager(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -146,7 +146,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={callNumber}
                             onChange={(e) => setCallNumber(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -157,7 +157,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -168,7 +168,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={boothLayout}
                             onChange={(e) => setBoothLayout(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -183,7 +183,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={boothManager}
                             onChange={(e) => setBoothManager(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -194,7 +194,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={boothCallNumber}
                             onChange={(e) => setBoothCallNumber(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -261,7 +261,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={applicant}
                             onChange={(e) => setApplicant(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -272,7 +272,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={applicantNum}
                             onChange={(e) => setApplicantNum(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
@@ -294,7 +294,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={collectionLoc}
                             onChange={(e) => setCollectionLoc(e.target.value)}
-                            required
+
                             autoComplete="off"
                         />
                     </Grid>
