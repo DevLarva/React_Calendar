@@ -4,11 +4,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // useNavigate 훅을 import
+import { useNavigate } from 'react-router-dom';
 import Andnlogo from '../../assets/andnlogo.png';
-
+import LogoutIcon from '@mui/icons-material/Logout';  // 로그아웃 아이콘 import
+import { signout } from '../ApiService';
 export default function Header() {
-    const navigate = useNavigate(); // useNavigate 훅을 호출하여 네비게이터 생성
+    const navigate = useNavigate();
 
     function handleRefresh() {
         window.location.reload();
@@ -16,6 +17,15 @@ export default function Header() {
 
     function handleClientClick() {
         navigate('/andn');
+    }
+
+    function handleCalendarClick() {
+        navigate('/calendar');
+    }
+
+    function handleLogoutClick() {
+        signout()
+        console.log("Logging out");
     }
 
     return (
@@ -30,13 +40,13 @@ export default function Header() {
                         <img
                             src={Andnlogo}
                             alt="And N"
-                            style={{ marginRight: '16px', height: '40px', filter: 'invert(1)' }} // 이미지 크기 및 색상 반전 스타일
+                            style={{ marginRight: '16px', height: '40px', filter: 'invert(1)' }}
                         />
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button size='large' sx={{ color: 'black' }}>
-                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }} onClick={handleCalendarClick}>
                             일정
                         </Typography>
                     </Button>
@@ -45,9 +55,21 @@ export default function Header() {
                             클라이언트
                         </Typography>
                     </Button>
-                    <Button size='large' sx={{ color: 'black' }}>
+
+                    <Button
+                        size='large'
+                        sx={{
+                            color: 'black',
+                            border: '1px solid black', // outline 스타일
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '6px 10px', // 아이콘과 텍스트 사이 여유 공간 조절
+                        }}
+                        onClick={handleLogoutClick}
+                    >
+                        <LogoutIcon sx={{ marginRight: '3px' }} /> {/* 로그아웃 아이콘 추가 */}
                         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                            알림
+                            로그아웃
                         </Typography>
                     </Button>
                 </Box>

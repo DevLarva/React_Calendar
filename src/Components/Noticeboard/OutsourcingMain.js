@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container } from '@mui/material';
 import SearchBar from './SearchBar';
-import PostList from './PostList';
-import NewPostButton from './NewPostButton';
-import { getArticles } from '../../api';  // API 호출 관련 함수 import
-import { useNavigate } from 'react-router-dom';
+import OutsourcingList from './OutsourcingList';
+import { getOutsourcingList } from '../../api';  // API 호출 관련 함수 import
 import dayjs from 'dayjs';  // 날짜 변환을 위한 라이브러리
 
-function Main() {
+function OutsourcingMain() {
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchCriteria, setSearchCriteria] = useState('title');
+    const [searchCriteria, setSearchCriteria] = useState('author');
     const [posts, setPosts] = useState([]);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const data = await getArticles();
+                const data = await getOutsourcingList();
 
                 // createAt 값을 날짜 형식으로 변환
                 const formattedData = data.map(post => ({
                     ...post,
-                    date: dayjs(post.createAt).format('YYYY-MM-DD')
+                    // title: post.title || "제목 없음",  // title 필드가 비어 있을 경우 기본 값을 설정
+                    date: dayjs(post.createdAt).format('YYYY-MM-DD')
                 }));
 
                 setPosts(formattedData);
@@ -38,10 +36,6 @@ function Main() {
         post[searchCriteria] && normalizeText(post[searchCriteria]).includes(normalizeText(searchQuery))
     );
 
-    const handleNewPostClick = () => {
-        navigate('/newpost');
-    };
-
     return (
         <>
             <Container>
@@ -54,12 +48,11 @@ function Main() {
                     />
                 </Box>
                 <Box my={4} sx={{ position: 'relative' }}>
-                    <PostList posts={filteredPosts} />
-                    <NewPostButton onClick={handleNewPostClick} />
+                    <OutsourcingList posts={filteredPosts} />
                 </Box>
             </Container>
         </>
     );
 }
 
-export default Main;
+export default OutsourcingMain;

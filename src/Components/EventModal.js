@@ -2,8 +2,10 @@ import React, { useContext, useState, useEffect } from 'react';
 import GlobalContext from '../context/GlobalContext';
 import dayjs from 'dayjs';
 import { call } from './ApiService';
+import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
+import { getToken } from '../../src/auth'; // 토큰 가져오는 함수
 
-const labelsClasses = [   //색상 추가(6/1)
+const labelsClasses = [
   "red",
   "orange",
   "yellow",
@@ -24,6 +26,7 @@ export default function EventModal() {
     selectedEvent
   } = useContext(GlobalContext);
 
+  const [isOwner, setIsOwner] = useState(false);
   const [title, setTitle] = useState(
     selectedEvent ? selectedEvent.title : ""
   );
@@ -39,6 +42,25 @@ export default function EventModal() {
   const [endDate, setEndDate] = useState(
     selectedEvent ? dayjs(selectedEvent.endDate).format("YYYY-MM-DD") : daySelected.format("YYYY-MM-DD")
   );
+
+  useEffect(() => {
+    const fetchUserId = () => {
+      const token = getToken();
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        const currentUserId = decodedToken.sub;
+
+        // selectedEvent가 존재하면 수정 모드
+        if (selectedEvent && String(selectedEvent.author) === String(currentUserId)) {
+          setIsOwner(true);
+        } else if (selectedEvent) {
+          setIsOwner(false);
+        }
+      }
+    };
+
+    fetchUserId();
+  }, [selectedEvent]);
 
   const add = (item) => {
     call("/api/andnCalendar/todo", "POST", item)
@@ -66,6 +88,9 @@ export default function EventModal() {
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    if (selectedEvent && !isOwner) return; // 수정 모드에서 소유자가 아니면 아무 작업도 하지 않음
+
     const calendarEvent = {
       id: selectedEvent ? selectedEvent.id : null,
       title,
@@ -84,27 +109,32 @@ export default function EventModal() {
     setShowEventModal(false);
   }
 
+  useEffect(() => {
+    console.log("isOwner 상태 값:", isOwner);
+  }, [isOwner]);
+
+  const isEditMode = Boolean(selectedEvent); // 편집 모드인지 여부 확인
+
   return (
-    <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center"> {/* 화면 전체를 덮는 모달 */}
-      <form className="bg-white rounded-lg shadow-2xl w-1/4"> {/* 모달의 스타일링 */}
-        <header className="bg-gray-100 px-4 py-2 flex justify-between items-center"> {/* 모달 헤더 */}
+    <div className="h-screen w-full fixed left-0 top-0 flex justify-center items-center">
+      <form className="bg-white rounded-lg shadow-2xl w-1/4">
+        <header className="bg-gray-100 px-4 py-2 flex justify-between items-center">
           <span className="material-icons-outlined text-gray-400">
             drag_handle
           </span>
           <div>
-            {selectedEvent && (
+            {isEditMode && isOwner && (
               <span
                 onClick={() => {
-                  dispatchCalEvent({ type: "delete", payload: selectedEvent }); // 이벤트 삭제
+                  dispatchCalEvent({ type: "delete", payload: selectedEvent });
                   deleteItem(selectedEvent);
-                  console.log("Delete item id:", update.call.id);
                   setShowEventModal(false);
                 }}
                 className="material-icons-outlined text-gray-400 cursor-pointer">
                 delete
               </span>
             )}
-            <button onClick={() => setShowEventModal(false)}> {/* 모달 닫기 버튼 */}
+            <button onClick={() => setShowEventModal(false)}>
               <span className="material-icons-outlined text-gray-400">
                 close
               </span>
@@ -120,13 +150,14 @@ export default function EventModal() {
               placeholder="제목"
               value={title}
               required
+              disabled={isEditMode && !isOwner}  // 수정 모드에서 소유자가 아니면 필드 비활성화
               className="pt-3 border-0 text-gray-600 text-xl font-semibold pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
-              onChange={(e) => setTitle(e.target.value)}  // 제목 입력 필드
+              onChange={(e) => setTitle(e.target.value)}
             />
             <span className="material-icons-outlined text-gray-400">
               schedule
             </span>
-            <p>{daySelected.format("dddd, MMMM D일")}</p> {/* 선택된 날짜 표시 */}
+            <p>{daySelected.format("dddd, MMMM D일")}</p>
             <span className="material-icons-outlined text-gray-400">
               segment
             </span>
@@ -136,8 +167,9 @@ export default function EventModal() {
               placeholder="내용을 추가해주세요"
               value={description}
               required
+              disabled={isEditMode && !isOwner}  // 수정 모드에서 소유자가 아니면 필드 비활성화
               className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
-              onChange={(e) => setDescription(e.target.value)}  // 설명 입력 필드
+              onChange={(e) => setDescription(e.target.value)}
             />
             <span className="material-icons-outlined text-gray-400 self-start">
               bookmark_border
@@ -146,8 +178,8 @@ export default function EventModal() {
               {labelsClasses.map((lblClass, i) => (
                 <span
                   key={i}
-                  onClick={() => setSelectedLabel(lblClass)}
-                  className={`bg-${lblClass}-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}> {/* 라벨 선택 */}
+                  onClick={() => (isEditMode && isOwner) ? setSelectedLabel(lblClass) : !isEditMode && setSelectedLabel(lblClass)}  // 수정 모드에서 소유자가 아니면 클릭 불가능
+                  className={`bg-${lblClass}-500 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer`}>
                   {selectedLabel === lblClass && (
                     <span className="material-icons-outlined text-white text-sm">
                       check
@@ -163,8 +195,9 @@ export default function EventModal() {
               type="date"
               name="startDate"
               value={startDate}
+              disabled={isEditMode && !isOwner}  // 수정 모드에서 소유자가 아니면 필드 비활성화
               className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
-              onChange={(e) => setStartDate(e.target.value)}  // 시작 날짜 입력 필드
+              onChange={(e) => setStartDate(e.target.value)}
             />
             <span className="material-icons-outlined text-gray-400">
               event
@@ -173,14 +206,20 @@ export default function EventModal() {
               type="date"
               name="endDate"
               value={endDate}
-              className="pt-3 border-0 text-gray-600 pb-2 w-full sborder-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
-              onChange={(e) => setEndDate(e.target.value)}  // 종료 날짜 입력 필드
+              disabled={isEditMode && !isOwner}  // 수정 모드에서 소유자가 아니면 필드 비활성화
+              className="pt-3 border-0 text-gray-600 pb-2 w-full border-b-2 border-gray-200 focus:outline-none focus:ring-0 focus:border-blue-500"
+              onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
         </div>
         <footer className="flex justify-end border-t p-3 mt-5">
-          <button type="submit" onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded text-white">
-            저장 {/* 저장 버튼 */}
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className={`px-6 py-2 rounded text-white ${isEditMode && !isOwner ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
+            disabled={isEditMode && !isOwner}  // 수정 모드에서 소유자가 아니면 버튼 비활성화
+          >
+            저장
           </button>
         </footer>
       </form>
@@ -191,3 +230,4 @@ export default function EventModal() {
 
 
 //TODO: 색상 수 늘리기 (노션 피드백 1차 배포 결과 참고)
+//ERROR: 삭제하고 나서 새로고침하면 계속 삭제한게 출력

@@ -23,14 +23,18 @@ export function call(api, method, request) {
     options.body = JSON.stringify(request);
   }
   return fetch(options.url, options)
-    .then((response) =>
-      response.json().then((json) => {
+    .then(response => {
+      if (response.status === 204) {
+        // No content
+        return null;
+      }
+      return response.json().then((json) => {
         if (!response.ok) {
           return Promise.reject(json);
         }
         return json;
-      })
-    )
+      });
+    })
     .catch((error) => {
       console.log(error.status);
       if (error.status === 403) {
@@ -38,6 +42,7 @@ export function call(api, method, request) {
       }
       return Promise.reject(error);
     });
+
 }
 
 export function signin(userDTO) {
@@ -52,7 +57,7 @@ export function signin(userDTO) {
 
 export function signout() {
   localStorage.setItem(ACCESS_TOKEN, null);
-  window.location.href = "/login";
+  window.location.href = "/";
 }
 
 export function signup(userDTO) {
@@ -77,4 +82,3 @@ export function checkUserId(userDTO) {
       alert("중복된 아이디가 존재합니다. 다시 입력해주세요.");
     });
 }
-
