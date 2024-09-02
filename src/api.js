@@ -3,7 +3,7 @@ import { getToken } from './auth'; // 토큰을 가져오는 함수
 
 // 기본 URL 설정 및 요청 인터셉터 설정
 const api = axios.create({
-    baseURL: 'https://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com/',
+    baseURL: 'http://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com/',
     headers: {
         'Content-Type': 'application/json'
     }

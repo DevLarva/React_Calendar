@@ -124,9 +124,6 @@ export default function PostView({ onPostSaved }) {
             <Typography variant="h5" gutterBottom>
                 글 작성
             </Typography>
-            <FormGroup>
-                <FormControlLabel control={<Checkbox defaultChecked />} label="외주업체 공유" />
-            </FormGroup>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <TextField

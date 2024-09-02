@@ -3,12 +3,15 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { Box, Button, Typography } from '@mui/material';
 import Andnlogo from '../../assets/andnlogo.png';
+import { useNavigate } from 'react-router-dom';
 import { signout } from '../ApiService';
 import LogoutIcon from '@mui/icons-material/Logout';  // 로그아웃 아이콘 import
 
 export default function Header() {
+    const navigate = useNavigate();
+
     function handleRefresh() {
-        window.location.reload();
+        navigate('/client');
     }
     function handleLogoutClick() {
         signout();

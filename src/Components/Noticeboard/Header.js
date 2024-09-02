@@ -31,7 +31,7 @@ export default function Header() {
     }, []);
 
     function handleRefresh() {
-        window.location.reload();
+        navigate('/calendar');
     }
 
     function handleManagerClick() {

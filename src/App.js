@@ -1,65 +1,4 @@
-// import React, { useState, useContext, useEffect } from 'react';
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import { getMonth } from '../src/util';
-// import CalendarHeader from './Components/CalendarHeader';
-// import Sidebar from './Components/Sidebar';
-// import Month from './Components/Month';
-// import CombinedContextProvider from './context/CombinedContextProvider';
-// import EventModal from './Components/EventModal';
-// import Login from './Components/Login/Login';
-// import Register from './Components/Login/Register';
-// import ClientMain from './Components/Login/Main/ClientMain';
-// import OutsourcingMain from './Components/Login/Main/OutsourcingMain';
-// import PrivateRoute from './Components/Login/Context/PrivateRoute';
-// import CalendarContext from './context/GlobalContext';
-
-// function CalendarApp() {
-//   const [currentMonth, setCurrentMonth] = useState(getMonth());
-//   const { monthIndex, showEventModal } = useContext(CalendarContext);
-
-//   useEffect(() => {
-//     setCurrentMonth(getMonth(monthIndex));
-//   }, [monthIndex]);
-
-//   return (
-//     <React.Fragment>
-//       {showEventModal && <EventModal />}
-//       <div className='h-screen flex flex-col'>
-//         <CalendarHeader />
-//         <div className='flex flex-1'>
-//           <Sidebar />
-//           <Month month={currentMonth} />
-//         </div>
-//       </div>
-//     </React.Fragment>
-//   );
-// }
-
-// function App() {
-//   return (
-//     <CombinedContextProvider>
-//       <Router>
-//         <Routes>
-//           <Route path="/" element={<Login />} />
-//           <Route path="/register" element={<Register />} />
-//           <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
-//           <Route path="/ClientMain" element={<PrivateRoute><ClientMain /></PrivateRoute>} />
-//           <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
-//         </Routes>
-//       </Router>
-//     </CombinedContextProvider>
-//   );
-// }
-
-// export default App;
-
-
-/*
- TODO:
- - 로그인 이후 새로고침하면 팅김(로그인 화면으로) 
- */
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Components/Noticeboard/Header';
 import Main from './Components/Noticeboard/Main';
@@ -86,6 +25,7 @@ import ManagerMain from './Components/Noticeboard/ManagerMain';
 import ClientPostDetail from './Components/Noticeboard/ClientDetail';
 import PostEditView from './Components/Noticeboard/PostEditView';
 import ClientEditView from './Components/Noticeboard/ClientEditView';
+import { isMobile, isTablet, isBrowser } from 'react-device-detect';
 
 
 function CalendarApp() {
@@ -95,6 +35,16 @@ function CalendarApp() {
   React.useEffect(() => {
     setCurrentMonth(getMonth(monthIndex));
   }, [monthIndex]);
+
+  function setScreenSize() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+  }
+  useEffect(() => {
+    setScreenSize();
+    window.addEventListener('resize', setScreenSize);
+    return () => window.removeEventListener('resize', setScreenSize);
+  }, []);
 
   return (
     <React.Fragment>
@@ -115,32 +65,66 @@ function AppContent() {
 
   const showHeader = ['/calendar', '/andn', '/manager', '/clients'].includes(location.pathname);
   const showClientHeader = ['/client', '/client/posts', '/OutsourcingMain'].includes(location.pathname);
+  function setScreenSize() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+  }
+  useEffect(() => {
+    setScreenSize();
+    window.addEventListener('resize', setScreenSize);
+    return () => window.removeEventListener('resize', setScreenSize);
+  }, []);
 
   return (
     <>
       {showHeader && <Header />}
       {showClientHeader && <ClientHeader />}
 
-      <Routes>
-        {/* 기존 라우트들 */}
-        <Route path="/" element={<Login />} />
-        <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
-        <Route path="/client" element={<ClientMain />} />
-        <Route path="/clients" element={<ClientMain />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/andn" element={<Main />} />
-        <Route path="/manager" element={<ManagerMain />} />
-        <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
-        <Route path="/client/posts" element={<ClientPostView onClientPostSaved={() => { }} />} />
-        <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
+      {isBrowser && (
+        <Routes>
+          {/* 기존 라우트들 */}
+          <Route path="/" element={<Login />} />
+          <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
+          <Route path="/client" element={<ClientMain />} />
+          <Route path="/clients" element={<ClientMain />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/andn" element={<Main />} />
+          <Route path="/manager" element={<ManagerMain />} />
+          <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
+          <Route path="/client/posts" element={<ClientPostView onClientPostSaved={() => { }} />} />
+          <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
 
-        {/* 상세보기 페이지 라우트 추가 */}
-        <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
-        <Route path="/client/posts/:id" element={<PrivateRoute><ClientPostDetail /></PrivateRoute>} />
-        <Route path="/outsourcing/articles/:id" element={<PrivateRoute><OutsourcingDetail /></PrivateRoute>} />
-        <Route path="/andn/posts/edit" element={<PrivateRoute><PostEditView /></PrivateRoute>} />
-        <Route path="/client/posts/edit" element={<PrivateRoute><ClientEditView /></PrivateRoute>} />
-      </Routes>
+          {/* 상세보기 페이지 라우트 추가 */}
+          <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
+          <Route path="/client/posts/:id" element={<PrivateRoute><ClientPostDetail /></PrivateRoute>} />
+          <Route path="/outsourcing/articles/:id" element={<PrivateRoute><OutsourcingDetail /></PrivateRoute>} />
+          <Route path="/andn/posts/edit" element={<PrivateRoute><PostEditView /></PrivateRoute>} />
+          <Route path="/client/posts/edit" element={<PrivateRoute><ClientEditView /></PrivateRoute>} />
+        </Routes>
+      )}
+
+      {isMobile && (
+        <Routes>
+          {/* 기존 라우트들 */}
+          <Route path="/" element={<Login />} />
+          <Route path="/newpost" element={<PostView onPostSaved={() => { }} />} />
+          <Route path="/client" element={<ClientMain />} />
+          <Route path="/clients" element={<ClientMain />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/andn" element={<Main />} />
+          <Route path="/manager" element={<ManagerMain />} />
+          <Route path="/calendar" element={<PrivateRoute><CalendarApp /></PrivateRoute>} />
+          <Route path="/client/posts" element={<ClientPostView onClientPostSaved={() => { }} />} />
+          <Route path="/OutsourcingMain" element={<PrivateRoute><OutsourcingMain /></PrivateRoute>} />
+
+          {/* 상세보기 페이지 라우트 추가 */}
+          <Route path="/andn/posts/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
+          <Route path="/client/posts/:id" element={<PrivateRoute><ClientPostDetail /></PrivateRoute>} />
+          <Route path="/outsourcing/articles/:id" element={<PrivateRoute><OutsourcingDetail /></PrivateRoute>} />
+          <Route path="/andn/posts/edit" element={<PrivateRoute><PostEditView /></PrivateRoute>} />
+          <Route path="/client/posts/edit" element={<PrivateRoute><ClientEditView /></PrivateRoute>} />
+        </Routes>
+      )}
     </>
   );
 }
