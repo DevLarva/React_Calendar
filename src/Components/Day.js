@@ -123,3 +123,6 @@ export default function Day({ day, rowIdx }) {
     </div>
   );
 }
+
+
+//TODO: 일정에서 2, 2개일때 경우에서 어떻게 할지 조치 필요. 4,2에서는 오류 X
