@@ -4,11 +4,14 @@ import { useDropzone } from 'react-dropzone';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DatePicker from 'react-datepicker';
+import { format } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ko } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { saveClientPost } from '../../api'; // Assuming saveClientPost is an API function you have set up
 import CustomToggle from './CustomToggle';
+import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
+import { getToken } from '../../auth'; // 토큰 가져오는 함수
 
 export default function ClientPostView({ onClientPostSaved }) {
     const [eventName, setEventName] = useState('');
@@ -28,11 +31,27 @@ export default function ClientPostView({ onClientPostSaved }) {
     const [collectionLoc, setCollectionLoc] = useState('');         //확인 요망
     const [memo, setMemo] = useState('');
     const navigate = useNavigate();
+    const [isClient, setIsClient] = useState(true); // 상태와 상태 설정 함수 정의
     const [isToggled, setIsToggled] = useState(false);
 
     const handleToggle = () => {
         setIsToggled(!isToggled);
-    };
+    }
+
+    useEffect(() => {
+        const token = getToken();
+        if (token) {
+            const decodedToken = jwtDecode(token);
+            const currentUserRole = decodedToken.role; // 토큰에서 사용자 ID 추출// 게시물의 작성자 ID와 현재 사용자의 ID 비교
+            console.log("유저 role", currentUserRole);
+
+            if (currentUserRole === "ROLE_CLIENT") {
+                setIsClient(true);
+            } else {
+                setIsClient(false);
+            }
+        }
+    }, []);
 
     const onDrop = useCallback((acceptedFiles) => {
         setSelectedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
@@ -59,13 +78,25 @@ export default function ClientPostView({ onClientPostSaved }) {
             formData.append('boothLayout', boothLayout);
             formData.append('boothManager', boothManager);
             formData.append('boothCallNumber', boothCallNumber);
-            formData.append('installDate', installDate);
-            formData.append('removeDate', removeDate);
             formData.append('applicant', applicant);
             formData.append('applicantNum', applicantNum);
             formData.append('collectionDay', collectionDay);
             formData.append('collectionLoc', collectionLoc);
             formData.append('memo', memo);
+
+            if (installDate) {
+                const formattedInstallDate = [
+                    format(new Date(installDate), 'yyyy-MM-dd')
+                ];
+                formData.append('installDate', formattedInstallDate);
+            }
+
+            if (removeDate) {
+                const formattedInstallDate = [
+                    format(new Date(removeDate), 'yyyy-MM-dd')
+                ];
+                formData.append('removeDate', formattedInstallDate);
+            }
 
             selectedFiles.forEach(file => {
                 formData.append('files', file);
@@ -74,8 +105,12 @@ export default function ClientPostView({ onClientPostSaved }) {
             await saveClientPost(formData);
             console.log('게시물이 성공적으로 저장되었습니다');
             onClientPostSaved();
-            navigate('/client');
 
+            if (isClient) {
+                navigate('/client');
+            } else {
+                navigate('/clients');
+            }
         } catch (error) {
             console.error('게시물 저장 중 오류 발생:', error);
         }
@@ -119,8 +154,8 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={eventName}
                             onChange={(e) => setEventName(e.target.value)}
-                            required
                             autoComplete="off"
+                            required
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -130,7 +165,6 @@ export default function ClientPostView({ onClientPostSaved }) {
                             fullWidth
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -164,7 +198,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             autoComplete="off"
                         />
                     </Grid>
-                    <Grid item xs={6}>
+                    {/* <Grid item xs={6}>
                         <TextField
                             label="부스 배치도"
                             variant="outlined"
@@ -173,7 +207,7 @@ export default function ClientPostView({ onClientPostSaved }) {
                             onChange={(e) => setBoothLayout(e.target.value)}
                             autoComplete="off"
                         />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <Typography variant="h6">부스 담당자</Typography>
                         <Divider />
@@ -261,7 +295,6 @@ export default function ClientPostView({ onClientPostSaved }) {
                         <Divider />
                     </Grid>
 
-                    {/* 토글 상태에 따라 폼을 표시하거나 숨김 */}
                     {isToggled && (
                         <>
                             <Grid item xs={6}>
@@ -290,14 +323,14 @@ export default function ClientPostView({ onClientPostSaved }) {
                                     selected={collectionDay}
                                     onChange={(date) => setCollectionDay(date)}
                                     dateFormat="yyyy/MM/dd"
-                                    customInput={<TextField fullWidth label="보관 일시" variant="outlined" />}
+                                    customInput={<TextField fullWidth label="픽업 일시" variant="outlined" />}
                                     autoComplete="off"
                                     placeholderText="선택하지 않음"
                                 />
                             </Grid>
                             <Grid item xs={6}>
                                 <TextField
-                                    label="수거장소"
+                                    label="픽업 장소"
                                     variant="outlined"
                                     fullWidth
                                     value={collectionLoc}
@@ -344,6 +377,7 @@ export default function ClientPostView({ onClientPostSaved }) {
         </Container>
     );
 }
+
 
 
 /*

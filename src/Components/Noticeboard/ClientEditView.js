@@ -9,10 +9,16 @@ import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
 import { patchClientPost } from '../../api';
+import CustomToggle from './CustomToggle';
 
 
 export default function ClientEditView({ onPostSaved }) {
     const navigate = useNavigate();
+    const [isToggled, setIsToggled] = useState(false);
+
+    const handleToggle = () => {
+        setIsToggled(!isToggled);
+    }
 
     // 접두사 부분을 제거하는 함수
     const removePrefix = (filename) => {
@@ -85,13 +91,25 @@ export default function ClientEditView({ onPostSaved }) {
             formData.append('boothLayout', postData.boothLayout);
             formData.append('boothManager', postData.boothManager);
             formData.append('boothCallNumber', postData.boothCallNumber);
-            formData.append('installDate', postData.installDate);
-            formData.append('removeDate', postData.removeDate);
             formData.append('applicant', postData.applicant);
             formData.append('applicantNum', postData.applicantNum);
             formData.append('collectionDay', postData.collectionDay);
             formData.append('collectionLoc', postData.collectionLoc);
             formData.append('memo', postData.memo);
+
+            if (postData.installDate) {
+                const formattedInstallDate = [
+                    format(new Date(postData.installDate), 'yyyy-MM-dd')
+                ];
+                formData.append('installDate', formattedInstallDate);
+            }
+
+            if (postData.removeDate) {
+                const formattedInstallDate = [
+                    format(new Date(postData.removeDate), 'yyyy-MM-dd')
+                ];
+                formData.append('removeDate', formattedInstallDate);
+            }
 
             selectedFiles.forEach(file => {
                 if (file.file instanceof File) {
@@ -145,7 +163,6 @@ export default function ClientEditView({ onPostSaved }) {
                             fullWidth
                             value={postData.companyName}
                             onChange={(e) => setPostData({ ...postData, companyName: e.target.value })}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -156,7 +173,6 @@ export default function ClientEditView({ onPostSaved }) {
                             fullWidth
                             value={postData.manager}
                             onChange={(e) => setPostData({ ...postData, manager: e.target.value })}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -167,7 +183,6 @@ export default function ClientEditView({ onPostSaved }) {
                             fullWidth
                             value={postData.callNumber}
                             onChange={(e) => setPostData({ ...postData, callNumber: e.target.value })}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -178,18 +193,6 @@ export default function ClientEditView({ onPostSaved }) {
                             fullWidth
                             value={postData.location}
                             onChange={(e) => setPostData({ ...postData, location: e.target.value })}
-                            required
-                            autoComplete="off"
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="부스 배치도"
-                            variant="outlined"
-                            fullWidth
-                            value={postData.boothLayout}
-                            onChange={(e) => setPostData({ ...postData, boothLayout: e.target.value })}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -204,7 +207,6 @@ export default function ClientEditView({ onPostSaved }) {
                             fullWidth
                             value={postData.boothManager}
                             onChange={(e) => setPostData({ ...postData, boothManager: e.target.value })}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -215,7 +217,6 @@ export default function ClientEditView({ onPostSaved }) {
                             fullWidth
                             value={postData.boothCallNumber}
                             onChange={(e) => setPostData({ ...postData, boothCallNumber: e.target.value })}
-                            required
                             autoComplete="off"
                         />
                     </Grid>
@@ -242,7 +243,7 @@ export default function ClientEditView({ onPostSaved }) {
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="h6">그래픽 신청 내역</Typography>
+                        <Typography variant="h6">파일 첨부</Typography>
                         <Divider />
                     </Grid>
                     <Grid item xs={12}>
@@ -272,65 +273,73 @@ export default function ClientEditView({ onPostSaved }) {
                         )}
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="h6">물품 픽업</Typography>
+                        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ paddingBottom: '16px' }} >
+                            <Typography variant="h6">물품 픽업</Typography>
+                            <CustomToggle isOn={isToggled}
+                                handleToggle={handleToggle}
+
+                            />
+                        </Box>
                         <Divider />
                     </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="신청인"
-                            variant="outlined"
-                            fullWidth
-                            value={postData.applicant}
-                            onChange={(e) => setPostData({ ...postData, applicant: e.target.value })}
-                            required
-                            autoComplete="off"
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="연락처"
-                            variant="outlined"
-                            fullWidth
-                            value={postData.applicantNum}
-                            onChange={(e) => setPostData({ ...postData, applicantNum: e.target.value })}
-                            required
-                            autoComplete="off"
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <DatePicker
-                            locale={ko}
-                            selected={postData.collectionDay}
-                            onChange={(date) => setPostData({ ...postData, collectionDay: date })}
-                            dateFormat="yyyy/MM/dd"
-                            customInput={<TextField fullWidth label="보관 일시" variant="outlined" />}
-                            autoComplete="off"
-                            placeholderText="선택하지 않음"
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="수거장소"
-                            variant="outlined"
-                            fullWidth
-                            value={postData.collectionLoc}
-                            onChange={(e) => setPostData({ ...postData, collectionLoc: e.target.value })}
-                            required
-                            autoComplete="off"
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            label="메모"
-                            variant="outlined"
-                            fullWidth
-                            value={postData.memo}
-                            onChange={(e) => setPostData({ ...postData, memo: e.target.value })}
-                            multiline
-                            rows={4}
-                            autoComplete="off"
-                        />
-                    </Grid>
+
+                    {isToggled && (
+                        <>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="신청인"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={postData.applicant}
+                                    onChange={(e) => setPostData({ ...postData, applicant: e.target.value })}
+                                    autoComplete="off"
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="연락처"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={postData.applicantNum}
+                                    onChange={(e) => setPostData({ ...postData, applicantNum: e.target.value })}
+                                    autoComplete="off"
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <DatePicker
+                                    locale={ko}
+                                    selected={postData.collectionDay}
+                                    onChange={(date) => setPostData({ ...postData, collectionDay: date })}
+                                    dateFormat="yyyy/MM/dd"
+                                    customInput={<TextField fullWidth label="보관 일시" variant="outlined" />}
+                                    autoComplete="off"
+                                    placeholderText="선택하지 않음"
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    label="수거장소"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={postData.collectionLoc}
+                                    onChange={(e) => setPostData({ ...postData, collectionLoc: e.target.value })}
+                                    autoComplete="off"
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="메모"
+                                    variant="outlined"
+                                    fullWidth
+                                    value={postData.memo}
+                                    onChange={(e) => setPostData({ ...postData, memo: e.target.value })}
+                                    multiline
+                                    rows={4}
+                                    autoComplete="off"
+                                />
+                            </Grid>
+                        </>
+                    )}
                     <Grid item xs={6}>
                         <Button
                             variant="contained"

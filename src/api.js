@@ -3,7 +3,7 @@ import { getToken } from './auth'; // 토큰을 가져오는 함수
 
 // 기본 URL 설정 및 요청 인터셉터 설정
 const api = axios.create({
-    baseURL: 'http://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com/',
+    baseURL: 'http://andnproject-env.eba-vrmatduy.ap-northeast-2.elasticbeanstalk.com',
     headers: {
         'Content-Type': 'application/json'
     }
@@ -178,7 +178,18 @@ export const delUser = async (userID) => {
         const response = await api.delete(`/api/manage/users/${userID}`);
         return response.data;
     } catch (error) {
-        console.error("Andn 게시물 삭제 에러:", error);
+        console.error("유저 삭제 에러:", error);
+        throw error;
+    }
+};
+
+// 유저 승인
+export const acceptUser = async (userID) => {
+    try {
+        const response = await api.patch(`/api/manage/users/${userID}`);
+        return response.data;
+    } catch (error) {
+        console.error("유저 승인 에러:", error);
         throw error;
     }
 };

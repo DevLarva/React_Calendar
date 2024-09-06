@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, TablePagination, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { delUser } from '../../api';
+import { delUser, acceptUser } from '../../api';
 
 export default function UserList({ users }) {
     const navigate = useNavigate();
@@ -47,16 +47,31 @@ export default function UserList({ users }) {
         }
     };
 
+    const handleAccept = async (userID) => {
+        const confirmDelete = window.confirm("해당 회원의 가입을 승인하시겠습니까?");
+        if (confirmDelete) {
+            try {
+                await acceptUser(userID);
+                alert("사용자가 승인되었습니다. ");
+                navigate(0); // 페이지 새로고침을 통해 업데이트된 목록을 보여줍니다.
+            } catch (error) {
+                console.error("승인 중 오류가 발생했습니다: ", error);
+                alert("승인 중 오류가 발생했습니다.");
+            }
+        }
+    };
+
     return (
         <TableContainer component={Paper}>
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '5%' }}>No</TableCell>
+                        <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '10%' }}>No</TableCell>
                         <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '20%' }}>이름</TableCell>
                         <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '20%' }}>아이디</TableCell>
                         <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '20%' }}>소속</TableCell>
-                        <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '5%' }}></TableCell>
+                        <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '15%' }}>회원 삭제</TableCell>
+                        <TableCell sx={{ backgroundColor: '#f0f0f0', fontWeight: 'bold', width: '15%' }}>가입 승인</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -65,14 +80,24 @@ export default function UserList({ users }) {
                             key={user.id}
                             sx={{ cursor: 'pointer' }}
                         >
-                            <TableCell sx={{ width: '5%' }}>{page * rowsPerPage + index + 1}</TableCell>
+                            <TableCell sx={{ width: '10%' }}>{page * rowsPerPage + index + 1}</TableCell>
                             <TableCell sx={{ width: '20%' }}>{user.name}</TableCell>
                             <TableCell sx={{ width: '20%' }}>{user.userID}</TableCell>
                             <TableCell sx={{ width: '20%' }}>{translateRole(user.role)}</TableCell>
-                            <TableCell sx={{ width: '5%' }}>
+                            <TableCell sx={{ width: '15%' }}>
                                 <Button
                                     variant="contained"
-                                    color="primary"
+                                    color="success"
+                                    onClick={() => handleAccept(user.userID)}
+                                    disabled={user.acceptance === 'Y'} // acceptance가 'N'이면 비활성화
+                                >
+                                    승인
+                                </Button>
+                            </TableCell>
+                            <TableCell sx={{ width: '15%' }}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
                                     onClick={() => handleDelete(user.userID)}
                                 >
                                     삭제

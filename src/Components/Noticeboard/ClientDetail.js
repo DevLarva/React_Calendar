@@ -12,6 +12,7 @@ export default function ClientPostDetail() {
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
+    const [isClient, setIsClient] = useState(true);
 
     useEffect(() => {
         // 게시물 상세정보 가져오기
@@ -23,11 +24,17 @@ export default function ClientPostDetail() {
                 const token = getToken();
                 if (token) {
                     const decodedToken = jwtDecode(token);
-                    const currentUserId = decodedToken.sub; // 토큰에서 사용자 ID 추출// 게시물의 작성자 ID와 현재 사용자의 ID 비교
-                    console.log("토큰", typeof currentUserId);
-                    console.log("아이디", typeof response.authorId);
+                    const currentUserId = decodedToken.sub; // 토큰에서 사용자 ID 추출 -> 게시물의 작성자 ID와 현재 사용자의 ID 비교
+                    const currentUserRole = decodedToken.role; // 토큰에서 사용자 ROLE 추출
+                    console.log("유저 role", currentUserRole);
 
-                    if (response.authorId == currentUserId) {
+                    if (currentUserRole === "ROLE_CLIENT") {
+                        setIsClient(true);
+                    } else {
+                        setIsClient(false);
+                    }
+
+                    if (response.authorId == currentUserId || decodedToken.role == "ROLE_MANAGER") {
                         setIsOwner(true);
                     } else {
                         setIsOwner(false);
@@ -61,7 +68,13 @@ export default function ClientPostDetail() {
         try {
             await delClientPost(id); // 삭제 API 호출
             console.log('게시물이 성공적으로 삭제되었습니다');
-            navigate('/client'); // 삭제가 성공적으로 완료된 후 페이지 이동
+
+            if (isClient) {
+                navigate('/client');
+            } else {
+                navigate('/clients');
+            }
+
         } catch (error) {
             console.error('게시물 삭제 중 오류 발생:', error);
         }
@@ -113,9 +126,6 @@ export default function ClientPostDetail() {
                     <Grid item xs={6}>
                         <Typography variant="body1"><strong>행사 장소:</strong> {post.location}</Typography>
                     </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="body1"><strong>부스 배치도:</strong> {post.boothLayout}</Typography>
-                    </Grid>
                     <Grid item xs={12}>
                         <Typography variant="h6">부스 담당자</Typography>
                         <Divider />
@@ -137,7 +147,7 @@ export default function ClientPostDetail() {
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="h6">그래픽 신청 내역</Typography>
+                        <Typography variant="h6">파일 첨부</Typography>
                         <Divider />
                         <Box>
                             {post.fileUrls && post.fileUrls.length > 0 ? (
@@ -176,11 +186,11 @@ export default function ClientPostDetail() {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="body1">
-                            <strong>보관 일시:</strong> {post.collectionDay ? post.collectionDay : "보관 일시가 설정되지 않았습니다."}
+                            <strong>픽업 일시:</strong> {post.collectionDay ? post.collectionDay : "픽업 일시가 설정되지 않았습니다."}
                         </Typography>
                     </Grid>
                     <Grid item xs={6}>
-                        <Typography variant="body1"><strong>수거 장소:</strong> {post.collectionLoc}</Typography>
+                        <Typography variant="body1"><strong>픽업 장소:</strong> {post.collectionLoc}</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <Typography variant="h6">메모</Typography>

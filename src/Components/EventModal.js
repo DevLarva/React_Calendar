@@ -51,7 +51,7 @@ export default function EventModal() {
         const currentUserId = decodedToken.sub;
 
         // selectedEvent가 존재하면 수정 모드
-        if (selectedEvent && String(selectedEvent.author) === String(currentUserId)) {
+        if (selectedEvent && String(selectedEvent.author) === String(currentUserId) || decodedToken.role == "ROLE_MANAGER") {
           setIsOwner(true);
         } else if (selectedEvent) {
           setIsOwner(false);

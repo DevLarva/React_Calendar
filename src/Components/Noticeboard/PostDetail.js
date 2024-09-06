@@ -176,7 +176,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { getArticlesDetail, delAndnPost, downloadFile } from '../../api'; // API 호출을 위한 임포트
 import { getToken } from '../../auth'; // 토큰 가져오는 함수
 import { jwtDecode } from 'jwt-decode'; // jwt-decode 임포트
-import Andnlogo from '../../assets/andnlogo.png';
 
 export default function PostDetail() {
     const { id } = useParams(); // URL 매개변수에서 게시물 ID 가져오기
@@ -196,7 +195,7 @@ export default function PostDetail() {
                     const decodedToken = jwtDecode(token);
                     const currentUserId = decodedToken.sub; // 토큰에서 사용자 ID 추출
 
-                    if (response.authorId === currentUserId) {
+                    if (response.authorId == currentUserId || decodedToken.role == "ROLE_MANAGER") {
                         setIsOwner(true);
                     } else {
                         setIsOwner(false);
@@ -207,7 +206,6 @@ export default function PostDetail() {
                 if (response.fileUrls && response.fileUrls.length > 0) {
                     const previewImages = response.fileUrls.map(file => file.url);
                     setPreviewImg(previewImages);
-                    console.log("image", previewImages)
                     setFiles(response.fileUrls); // 첨부 파일 상태 설정
                 }
 
@@ -314,7 +312,7 @@ export default function PostDetail() {
                         <Box>
                             {files.length > 0 ? (
                                 files.map((file, index) => (
-                                    <Box key={file.url} sx={{ mt: 1 }}>
+                                    <Box key={index} sx={{ mt: 1 }}>
                                         <Typography variant="body2">
                                             <strong>파일 {index + 1}:</strong>{' '}
                                             <a
@@ -326,23 +324,18 @@ export default function PostDetail() {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
-                                                {decodeURIComponent(file.url.split('/').pop())}
+                                                {decodeURIComponent(file.url.split('/').pop())} {/* 파일명을 디코딩하여 표시 */}
                                             </a>
                                         </Typography>
-                                        {(file.url.endsWith('.png')) ? (
+                                        {file.url.endsWith('.png') || file.url.endsWith('.jpg') || file.url.endsWith('.jpeg') ? (
                                             <img
                                                 src={file.url}
                                                 alt={`Preview-${index}`}
                                                 style={{ maxWidth: '100px', maxHeight: '100px', display: 'block', marginTop: '8px' }}
                                             />
-                                        ) : <img
-                                            src={Andnlogo}
-                                            alt="And N"
-                                            style={{ maxWidth: '100px', maxHeight: '100px', display: 'block', marginTop: '8px' }}
-                                        />}
+                                        ) : null}
                                     </Box>
                                 ))
-
                             ) : (
                                 <Typography variant="body2">첨부 파일이 없습니다.</Typography>
                             )}
