@@ -31,26 +31,50 @@ export default function Day({ day, rowIdx }) {
     fetchHolidays();
   }, []);
 
-
   useEffect(() => {
     if (day) {
-      //기본
+      // 기본 필터링: 해당 날짜가 포함된 모든 이벤트
       const allEvents = filteredEvents.filter(
         (evt) => dayjs(day).isBetween(dayjs(evt.startDate), dayjs(evt.endDate), 'day', '[]')
       );
-      //단일
+
+      // 1. 같은 기간(2일짜리) 일정이 겹치는 경우를 우선적으로 필터링
+      const overlappingSameDurationEvents = allEvents.filter((evt, idx, self) =>
+        self.some(
+          (otherEvt) =>
+            evt !== otherEvt &&
+            dayjs(evt.startDate).isSame(dayjs(otherEvt.startDate), 'day') &&
+            dayjs(evt.endDate).isSame(dayjs(otherEvt.endDate), 'day')
+        )
+      );
+
+      // 2. 우선적으로 먼저 추가된 일정이 위에 오도록 정렬
+      overlappingSameDurationEvents.sort((a, b) => {
+        const aStart = dayjs(a.startDate);
+        const bStart = dayjs(b.startDate);
+
+        return aStart.isBefore(bStart) ? -1 : 1;
+      });
+
+      // 3. 나머지 일정들: 단일 일정과 다중 일정(기존 로직 유지)
       const singleDayEvents = allEvents.filter(
         (evt) => dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day')
       );
-      //다중
+
       const multiDayEvents = allEvents
-        .filter((evt) => !dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day'))
+        .filter(
+          (evt) =>
+            !dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day') &&
+            !overlappingSameDurationEvents.includes(evt) // 이미 겹치는 동일 기간 일정은 제외
+        )
         .sort((a, b) => {
           const aDuration = dayjs(a.endDate).diff(dayjs(a.startDate), 'day');
           const bDuration = dayjs(b.endDate).diff(dayjs(b.startDate), 'day');
           return bDuration - aDuration; // 긴 기간의 이벤트를 우선 순위로
         });
-      setDayEvents([...multiDayEvents, ...singleDayEvents]);
+
+      // 모든 이벤트를 배열에 합쳐서 정렬된 상태로 저장
+      setDayEvents([...overlappingSameDurationEvents, ...multiDayEvents, ...singleDayEvents]);
     }
   }, [filteredEvents, day]);
 
@@ -117,12 +141,8 @@ export default function Day({ day, rowIdx }) {
           >
             {evt.title}
           </div>
-
         ))}
       </div>
     </div>
   );
 }
-
-
-//TODO: 일정에서 2, 2개일때 경우에서 어떻게 할지 조치 필요. 4,2에서는 오류 X
