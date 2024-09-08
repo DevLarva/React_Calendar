@@ -14,49 +14,40 @@ export default function Day({ day, rowIdx }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // 공휴일 API에서 데이터를 가져오는 함수
     const fetchHolidays = async () => {
       try {
         const year = dayjs().year();
-        console.log("연도:", year)
-        const response = await axios.get(`https://date.nager.at/Api/v2/PublicHolidays/${year}/KR`);
+        const response = await axios.get(`${year}/KR`);
         setHolidays(response.data.map(holiday => dayjs(holiday.date)));
-        setLoading(false);
       } catch (err) {
         setError(err);
+      } finally {
         setLoading(false);
       }
     };
-
     fetchHolidays();
   }, []);
 
   useEffect(() => {
     if (day) {
-      // 기본 필터링: 해당 날짜가 포함된 모든 이벤트
       const allEvents = filteredEvents.filter(
         (evt) => dayjs(day).isBetween(dayjs(evt.startDate), dayjs(evt.endDate), 'day', '[]')
       );
 
-      // 1. 같은 기간(2일짜리) 일정이 겹치는 경우를 우선적으로 필터링
       const overlappingSameDurationEvents = allEvents.filter((evt, idx, self) =>
-        self.some(
-          (otherEvt) =>
-            evt !== otherEvt &&
-            dayjs(evt.startDate).isSame(dayjs(otherEvt.startDate), 'day') &&
-            dayjs(evt.endDate).isSame(dayjs(otherEvt.endDate), 'day')
+        self.some((otherEvt) =>
+          evt !== otherEvt &&
+          dayjs(evt.startDate).isSame(dayjs(otherEvt.startDate), 'day') &&
+          dayjs(evt.endDate).isSame(dayjs(otherEvt.endDate), 'day')
         )
       );
 
-      // 2. 우선적으로 먼저 추가된 일정이 위에 오도록 정렬
       overlappingSameDurationEvents.sort((a, b) => {
         const aStart = dayjs(a.startDate);
         const bStart = dayjs(b.startDate);
-
         return aStart.isBefore(bStart) ? -1 : 1;
       });
 
-      // 3. 나머지 일정들: 단일 일정과 다중 일정(기존 로직 유지)
       const singleDayEvents = allEvents.filter(
         (evt) => dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day')
       );
@@ -65,15 +56,14 @@ export default function Day({ day, rowIdx }) {
         .filter(
           (evt) =>
             !dayjs(evt.startDate).isSame(dayjs(evt.endDate), 'day') &&
-            !overlappingSameDurationEvents.includes(evt) // 이미 겹치는 동일 기간 일정은 제외
+            !overlappingSameDurationEvents.includes(evt)
         )
         .sort((a, b) => {
           const aDuration = dayjs(a.endDate).diff(dayjs(a.startDate), 'day');
           const bDuration = dayjs(b.endDate).diff(dayjs(b.startDate), 'day');
-          return bDuration - aDuration; // 긴 기간의 이벤트를 우선 순위로
+          return bDuration - aDuration;
         });
 
-      // 모든 이벤트를 배열에 합쳐서 정렬된 상태로 저장
       setDayEvents([...overlappingSameDurationEvents, ...multiDayEvents, ...singleDayEvents]);
     }
   }, [filteredEvents, day]);
@@ -96,18 +86,15 @@ export default function Day({ day, rowIdx }) {
     const isSingleDay = isStartDay && isEndDay;
 
     if (isSingleDay) {
-      return 'rounded-full px-1 py-1.5';  // 모든 모서리가 둥글고 추가 패딩
+      return 'rounded-full px-1 py-1.5';
     } else if (isStartDay) {
-      return 'rounded-l-lg px-2 py-1'; // 왼쪽 모서리가 둥글고 패딩 추가
+      return 'rounded-l-lg px-2 py-1';
     } else if (isEndDay) {
-      return 'rounded-r-lg px-2 py-1'; // 오른쪽 모서리가 둥글고 패딩 추가
+      return 'rounded-r-lg px-2 py-1';
     } else {
-      return 'rounded-none px-2 py-1'; // 모서리 둥근 모양 없음, 패딩 추가
+      return 'rounded-none px-2 py-1';
     }
   }
-
-  if (loading) return <p>...</p>;
-  if (error) return <p>Error 관리자에게 문의 {error.message}</p>;
 
   return (
     <div className="border border-gray-200 flex flex-col">
@@ -134,9 +121,9 @@ export default function Day({ day, rowIdx }) {
             onClick={() => setSelectedEvent(evt)}
             className={`bg-${evt.label}-200 text-gray-600 text-sm mb-2 truncate ${getEventPositionClass(evt)}`}
             style={{
-              marginRight: day && dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '2px' : '0',
-              paddingRight: dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '10px' : '2px', // 조건에 따라 패딩 설정
-              width: 'calc(100% + 2px)',  // 이 부분은 스타일이 균일하게 채워지도록 합니다.
+              marginRight: dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '2px' : '0',
+              paddingRight: dayjs(day).isSame(dayjs(evt.endDate), 'day') ? '10px' : '2px',
+              width: 'calc(100% + 2px)',
             }}
           >
             {evt.title}
